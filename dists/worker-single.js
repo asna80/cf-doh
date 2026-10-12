@@ -1287,152 +1287,309 @@ var metrics = {
 // src/landing.js
 function renderLandingHtml(origin, config) {
   return `<!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="auto">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>cf-doh \u2014 \u9AD8\u6027\u80FD\u81EA\u7814 Cloudflare Workers DoH \u89E3\u6790\u7F51\u5173</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>\u26A1</text></svg>">
+  <title>cf-doh \u2014 \u9AD8\u6027\u80FD\u81EA\u7814 Cloudflare Workers DoH/DoT \u89E3\u6790\u7F51\u5173</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%233b82f6%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><polygon points=%2213 2 3 14 12 14 11 22 21 10 12 10 13 2%22/></svg>">
+  <script>
+    (function() {
+      try {
+        var mode = localStorage.getItem('cf-doh-theme') || 'auto';
+        var resolved = mode;
+        if (mode === 'auto') {
+          var isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          resolved = isDark ? 'dark' : 'light';
+        }
+        document.documentElement.dataset.theme = mode;
+        document.documentElement.dataset.resolvedTheme = resolved;
+        if (resolved === 'dark') {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      } catch (e) {}
+    })();
+  <\/script>
   <style>
     :root {
-      --bg: #0b0f19;
-      --card-bg: rgba(23, 32, 54, 0.7);
+      --bg: #090d16;
+      --bg-subtle: #0f172a;
+      --card-bg: rgba(18, 26, 43, 0.75);
       --card-border: rgba(255, 255, 255, 0.08);
-      --text: #f3f4f6;
-      --text-muted: #9ca3af;
+      --card-hover-border: rgba(59, 130, 246, 0.3);
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-faint: #64748b;
       --primary: #3b82f6;
       --primary-hover: #2563eb;
-      --accent: #10b981;
-      --accent-orange: #f59e0b;
-      --code-bg: #060911;
+      --primary-glow: rgba(59, 130, 246, 0.15);
+      --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-rose: #ef4444;
+      --accent-purple: #8b5cf6;
+      --accent-orange: #f97316;
+      --code-bg: #050811;
+      --chip-bg: rgba(255, 255, 255, 0.04);
+      --chip-border: rgba(255, 255, 255, 0.08);
+      --nav-bg: rgba(9, 13, 22, 0.82);
     }
-    @media (prefers-color-scheme: light) {
-      :root {
-        --bg: #f8fafc;
-        --card-bg: rgba(255, 255, 255, 0.9);
-        --card-border: rgba(0, 0, 0, 0.08);
-        --text: #0f172a;
-        --text-muted: #64748b;
-        --primary: #2563eb;
-        --primary-hover: #1d4ed8;
-        --accent: #059669;
-        --accent-orange: #d97706;
-        --code-bg: #f1f5f9;
-      }
+    html:not(.dark) {
+      --bg: #f8fafc;
+      --bg-subtle: #f1f5f9;
+      --card-bg: rgba(255, 255, 255, 0.9);
+      --card-border: rgba(0, 0, 0, 0.08);
+      --card-hover-border: rgba(37, 99, 235, 0.3);
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --text-faint: #94a3b8;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --primary-glow: rgba(37, 99, 235, 0.1);
+      --accent-emerald: #059669;
+      --accent-amber: #d97706;
+      --accent-rose: #dc2626;
+      --accent-purple: #7c3aed;
+      --accent-orange: #ea580c;
+      --code-bg: #f1f5f9;
+      --chip-bg: rgba(0, 0, 0, 0.03);
+      --chip-border: rgba(0, 0, 0, 0.08);
+      --nav-bg: rgba(248, 250, 252, 0.85);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", "Helvetica Neue", Arial, sans-serif;
       background-color: var(--bg);
       color: var(--text);
       line-height: 1.6;
-      padding: 0;
       overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      transition: background-color 0.25s ease, color 0.25s ease;
     }
+    a { color: var(--primary); text-decoration: none; transition: color 0.2s; }
+    a:hover { color: var(--primary-hover); text-decoration: underline; }
+    
+    /* Navigation Bar */
+    .nav-bar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: var(--nav-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--card-border);
+      padding: 12px 24px;
+    }
+    .nav-inner {
+      max-width: 1140px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      font-size: 1.15rem;
+      letter-spacing: -0.02em;
+      color: var(--text);
+    }
+    .brand-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+    }
+    .version-tag {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 9999px;
+      background: var(--primary-glow);
+      color: var(--primary);
+      border: 1px solid var(--card-border);
+    }
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    
+    /* Layout Container */
     .container {
-      max-width: 1080px;
+      max-width: 1140px;
       margin: 0 auto;
       padding: 40px 20px 80px 20px;
+      width: 100%;
+      flex: 1;
     }
-    header {
+    
+    /* Hero Header */
+    .hero {
       text-align: center;
-      margin-bottom: 48px;
+      margin-bottom: 44px;
+      padding: 10px 0 20px 0;
     }
-    .badge {
+    .hero-badge {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      padding: 4px 12px;
+      gap: 8px;
+      padding: 5px 14px;
       border-radius: 9999px;
       font-size: 0.85rem;
       font-weight: 500;
-      background: rgba(59, 130, 246, 0.15);
-      color: #60a5fa;
-      border: 1px solid rgba(59, 130, 246, 0.3);
-      margin-bottom: 16px;
+      background: var(--primary-glow);
+      color: var(--primary);
+      border: 1px solid var(--card-border);
+      margin-bottom: 18px;
     }
-    h1 {
+    .hero h1 {
       font-size: 2.75rem;
       font-weight: 800;
-      letter-spacing: -0.025em;
-      margin-bottom: 12px;
+      letter-spacing: -0.03em;
+      margin-bottom: 14px;
       background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 50%, #93c5fd 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
-    .subtitle {
+    html:not(.dark) .hero h1 {
+      background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 50%, #3b82f6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero-desc {
       font-size: 1.15rem;
       color: var(--text-muted);
-      max-width: 680px;
+      max-width: 760px;
       margin: 0 auto 24px auto;
     }
-    .tags {
+    .feature-tags {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
       gap: 8px;
+      max-width: 860px;
+      margin: 0 auto;
     }
-    .tag {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      padding: 4px 10px;
-      border-radius: 6px;
-      font-size: 0.8rem;
+    .feature-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--chip-bg);
+      border: 1px solid var(--chip-border);
+      padding: 5px 12px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 500;
       color: var(--text-muted);
     }
+    .feature-tag svg {
+      color: var(--primary);
+    }
+    
+    /* Grid system */
     .grid {
       display: grid;
       grid-template-columns: 1fr;
       gap: 24px;
       margin-bottom: 32px;
     }
-    @media (min-width: 768px) {
+    @media (min-width: 840px) {
       .grid-2 { grid-template-columns: 1fr 1fr; }
     }
+    @media (min-width: 1024px) {
+      .grid-3 { grid-template-columns: repeat(3, 1fr); }
+      .grid-4 { grid-template-columns: repeat(4, 1fr); }
+    }
+    
+    /* Modern Card */
     .card {
       background: var(--card-bg);
-      backdrop-filter: blur(12px);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
       border: 1px solid var(--card-border);
       border-radius: 16px;
       padding: 24px;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.2);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .card:hover {
+      border-color: var(--card-hover-border);
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--card-border);
     }
     .card-title {
       display: flex;
       align-items: center;
       gap: 10px;
-      font-size: 1.25rem;
+      font-size: 1.15rem;
       font-weight: 600;
-      margin-bottom: 16px;
+      letter-spacing: -0.01em;
     }
+    .card-title-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary);
+    }
+    
+    /* Inputs & Form Elements */
     .input-group {
       display: flex;
       gap: 8px;
       margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    @media (min-width: 540px) {
+      .input-group { flex-wrap: nowrap; }
     }
     input[type="text"] {
       flex: 1;
+      min-width: 180px;
       padding: 10px 14px;
-      border-radius: 8px;
+      border-radius: 10px;
       border: 1px solid var(--card-border);
       background: var(--code-bg);
       color: var(--text);
       font-size: 0.95rem;
       outline: none;
-      transition: border-color 0.2s;
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
     input[type="text"]:focus {
       border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-glow);
     }
     select {
-      padding: 10px 12px;
-      border-radius: 8px;
+      padding: 10px 14px;
+      border-radius: 10px;
       border: 1px solid var(--card-border);
       background: var(--code-bg);
       color: var(--text);
       font-size: 0.95rem;
       outline: none;
       cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    select:focus {
+      border-color: var(--primary);
     }
     button.btn {
       display: inline-flex;
@@ -1443,322 +1600,716 @@ function renderLandingHtml(origin, config) {
       background: var(--primary);
       color: #fff;
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
       font-weight: 600;
-      font-size: 0.95rem;
+      font-size: 0.92rem;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+      white-space: nowrap;
     }
-    button.btn:hover { background: var(--primary-hover); transform: translateY(-1px); }
-    .quick-chips {
+    button.btn:hover {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+    }
+    button.btn:active {
+      transform: translateY(0);
+    }
+    button.btn-secondary {
+      background: var(--chip-bg);
+      color: var(--text);
+      border: 1px solid var(--card-border);
+      box-shadow: none;
+    }
+    button.btn-secondary:hover {
+      background: var(--primary-glow);
+      color: var(--primary);
+      border-color: var(--primary);
+      box-shadow: none;
+    }
+    
+    /* Quick Domain Chips */
+    .chips-group {
       display: flex;
       flex-wrap: wrap;
+      align-items: center;
       gap: 6px;
       margin-bottom: 16px;
     }
+    .chips-label {
+      font-size: 0.78rem;
+      color: var(--text-faint);
+      margin-right: 4px;
+    }
     .chip {
-      background: var(--code-bg);
-      border: 1px solid var(--card-border);
-      padding: 3px 8px;
-      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--chip-bg);
+      border: 1px solid var(--chip-border);
+      padding: 4px 10px;
+      border-radius: 8px;
       font-size: 0.8rem;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
       color: var(--text-muted);
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.18s;
+      user-select: none;
     }
-    .chip:hover { color: var(--primary); border-color: var(--primary); }
-    .result-box {
+    .chip:hover {
+      color: var(--primary);
+      border-color: var(--primary);
+      background: var(--primary-glow);
+    }
+    
+    /* Code & Output Blocks */
+    .code-block {
+      position: relative;
       background: var(--code-bg);
-      border-radius: 10px;
-      padding: 16px;
+      border-radius: 12px;
+      padding: 14px 16px;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      font-size: 0.88rem;
+      font-size: 0.85rem;
       border: 1px solid var(--card-border);
-      min-height: 120px;
       overflow-x: auto;
-      white-space: pre-wrap;
+      margin-bottom: 12px;
+    }
+    .code-block code {
+      color: var(--text);
       word-break: break-all;
     }
-    .tabs {
+    .copy-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text-muted);
+      border-radius: 6px;
+      padding: 4px 9px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+    html:not(.dark) .copy-btn {
+      background: rgba(0, 0, 0, 0.05);
+      border-color: rgba(0, 0, 0, 0.1);
+      color: var(--text-muted);
+    }
+    .copy-btn:hover {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+    
+    /* Result Playground Box */
+    .playground-result {
+      background: var(--code-bg);
+      border-radius: 12px;
+      padding: 16px;
+      border: 1px solid var(--card-border);
+      min-height: 140px;
+    }
+    .meta-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+      padding-bottom: 12px;
+      border-bottom: 1px dashed var(--card-border);
+    }
+    .meta-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 9px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+    }
+    .meta-badge.success {
+      background: rgba(16, 185, 129, 0.12);
+      color: var(--accent-emerald);
+      border-color: rgba(16, 185, 129, 0.25);
+    }
+    .meta-badge.warn {
+      background: rgba(245, 158, 11, 0.12);
+      color: var(--accent-amber);
+      border-color: rgba(245, 158, 11, 0.25);
+    }
+    .meta-badge.error {
+      background: rgba(239, 68, 68, 0.12);
+      color: var(--accent-rose);
+      border-color: rgba(239, 68, 68, 0.25);
+    }
+    .meta-badge.info {
+      background: var(--primary-glow);
+      color: var(--primary);
+      border-color: rgba(59, 130, 246, 0.25);
+    }
+    
+    /* Record Table */
+    .record-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      margin-top: 8px;
+    }
+    .record-table th {
+      text-align: left;
+      padding: 8px 10px;
+      color: var(--text-faint);
+      font-weight: 600;
+      border-bottom: 1px solid var(--card-border);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .record-table td {
+      padding: 8px 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      word-break: break-all;
+    }
+    html:not(.dark) .record-table td {
+      border-bottom-color: rgba(0, 0, 0, 0.04);
+    }
+    .record-table tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .record-type-pill {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      background: rgba(59, 130, 246, 0.15);
+      color: var(--primary);
+    }
+    
+    /* View Switcher */
+    .view-switcher {
+      display: inline-flex;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 2px;
+      gap: 2px;
+      margin-left: auto;
+    }
+    html:not(.dark) .view-switcher {
+      background: rgba(0, 0, 0, 0.04);
+    }
+    .view-btn {
+      padding: 4px 10px;
+      font-size: 0.75rem;
+      border-radius: 6px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+    .view-btn.active {
+      background: var(--primary);
+      color: #fff;
+      font-weight: 600;
+    }
+    
+    /* Racing Telemetry Cards */
+    .metric-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+    .progress-bar-container {
+      display: flex;
+      height: 10px;
+      border-radius: 9999px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.08);
+      margin-bottom: 10px;
+    }
+    html:not(.dark) .progress-bar-container {
+      background: rgba(0, 0, 0, 0.08);
+    }
+    .progress-bar-fill {
+      height: 100%;
+      transition: width 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .latency-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px dashed var(--card-border);
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    .latency-grid b {
+      display: block;
+      color: var(--text);
+      font-size: 0.92rem;
+      margin-top: 2px;
+    }
+    
+    /* Tabs for Client Configuration */
+    .tabs-header {
       display: flex;
       gap: 6px;
       border-bottom: 1px solid var(--card-border);
       margin-bottom: 16px;
       overflow-x: auto;
-      padding-bottom: 6px;
+      padding-bottom: 8px;
+      scrollbar-width: thin;
     }
     .tab-btn {
-      padding: 6px 14px;
-      border-radius: 6px;
-      font-size: 0.88rem;
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 0.86rem;
       background: transparent;
-      border: none;
+      border: 1px solid transparent;
       color: var(--text-muted);
       cursor: pointer;
       font-weight: 500;
       white-space: nowrap;
+      transition: all 0.18s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .tab-btn:hover {
+      color: var(--text);
+      background: var(--chip-bg);
     }
     .tab-btn.active {
-      background: rgba(59, 130, 246, 0.15);
-      color: #60a5fa;
+      background: var(--primary-glow);
+      color: var(--primary);
+      border-color: var(--card-border);
       font-weight: 600;
     }
-    .scope-btn {
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      padding: 4px 10px;
-      font-size: 0.78rem;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 500;
-      transition: all 0.2s;
-    }
-    .scope-btn.active {
-      background: var(--primary);
-      color: #fff;
-    }
-    .scope-btn:hover:not(.active) {
-      color: var(--text);
-    }
-    .code-block {
-      position: relative;
-      background: var(--code-bg);
-      border-radius: 10px;
-      padding: 16px;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      font-size: 0.85rem;
+    
+    /* Feature Matrix List */
+    .feature-card {
+      background: var(--card-bg);
       border: 1px solid var(--card-border);
-      overflow-x: auto;
-    }
-    .copy-btn {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      color: var(--text);
-      border-radius: 6px;
-      padding: 4px 8px;
-      font-size: 0.75rem;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .copy-btn:hover { background: rgba(255, 255, 255, 0.2); }
-    .feature-list {
-      list-style: none;
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 12px;
-    }
-    @media (min-width: 640px) {
-      .feature-list { grid-template-columns: 1fr 1fr; }
-    }
-    .feature-item {
+      border-radius: 12px;
+      padding: 20px;
       display: flex;
-      gap: 12px;
+      gap: 16px;
       align-items: flex-start;
+      transition: border-color 0.2s, transform 0.2s;
     }
-    .feature-icon {
-      font-size: 1.25rem;
-      background: rgba(59, 130, 246, 0.1);
-      padding: 8px;
-      border-radius: 8px;
-      line-height: 1;
+    .feature-card:hover {
+      border-color: var(--card-hover-border);
+      transform: translateY(-2px);
     }
-    .footer {
+    .feature-icon-wrapper {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: var(--primary-glow);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    
+    /* Footer */
+    footer {
       text-align: center;
       color: var(--text-muted);
-      font-size: 0.9rem;
-      margin-top: 48px;
+      font-size: 0.88rem;
+      padding: 32px 20px;
       border-top: 1px solid var(--card-border);
-      padding-top: 24px;
+      background: var(--bg);
     }
-    .footer a {
-      color: var(--primary);
-      text-decoration: none;
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 18px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
     }
-    .footer a:hover { text-decoration: underline; }
+    
+    /* Notification Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--primary);
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      z-index: 100;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      pointer-events: none;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <div class="badge">\u{1F680} Cloudflare Workers \u2022 RFC 8484 \u2022 \u7EAF\u81EA\u7814</div>
-      <h1>cf-doh \u89E3\u6790\u7F51\u5173</h1>
-      <p class="subtitle">\u4E13\u4E3A\u56FD\u5185\u76F4\u8FDE\u52A0\u901F\u5B9A\u5236\u7684\u81EA\u7814 DNS-over-HTTPS \u89E3\u6790\u670D\u52A1\u3002\u5185\u7F6E\u56FD\u5185\u5916\u667A\u80FD\u5206\u6D41\u3001\u771F\u5B9E\u53EF\u4FE1 ECS \u6CE8\u5165\u4E0E\u5168\u4E0A\u6E38\u5E76\u53D1\u7ADE\u901F\u3002</p>
-      <div class="tags">
-        <span class="tag">\u26A1 \u5E76\u53D1\u7ADE\u4EF7 (Zero Wait)</span>
-        <span class="tag">\u{1F6E1}\uFE0F \u53EF\u4FE1\u51FA\u53E3 ECS</span>
-        <span class="tag">\u{1F1E8}\u{1F1F3} \u963F\u91CC\u4E91 / \u817E\u8BAF\u4E91 \u76F4\u8FDE</span>
-        <span class="tag">\u{1F310} Google / CF \u5168\u7403\u515C\u5E95</span>
-        <span class="tag">\u{1F512} DNSSEC \u900F\u4F20</span>
-        <span class="tag">\u{1F4CA} JSON API \u517C\u5BB9</span>
+  <!-- Top Navigation -->
+  <header class="nav-bar">
+    <div class="nav-inner">
+      <div class="nav-brand">
+        <div class="brand-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </div>
+        <span>cf-doh</span>
+        <span class="version-tag">v1.2.0</span>
       </div>
-    </header>
+      <div class="nav-actions">
+        <status-indicator id="globalGatewayStatus" status="online" label="\u8FB9\u7F18\u63A2\u6D4B\u4E2D..." show-dot="true"></status-indicator>
+        <theme-toggle storage-key="cf-doh-theme"></theme-toggle>
+      </div>
+    </div>
+  </header>
 
+  <main class="container">
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="hero-badge">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.2 4.8L6 9l4.8 1.2L12 15l1.2-4.8L18 9l-4.8-1.2L12 3Z"/></svg>
+        <span>Cloudflare Workers \u2022 RFC 8484 / RFC 7858 \u2022 \u53CC\u6808\u89E3\u6790</span>
+      </div>
+      <h1>cf-doh \u89E3\u6790\u7F51\u5173</h1>
+      <p class="hero-desc">
+        \u4E13\u4E3A\u56FD\u5185\u7F51\u7EDC\u73AF\u5883\u6DF1\u5EA6\u4F18\u5316\u7684\u81EA\u7814\u9AD8\u6027\u80FD DoH / DoT \u89E3\u6790\u670D\u52A1\u3002\u5185\u7F6E\u56FD\u5185\u5916\u667A\u80FD\u5206\u6D41\u3001\u771F\u5B9E\u53EF\u4FE1\u51FA\u53E3 ECS \u6CE8\u5165\u3001\u4E0A\u6E38\u5E76\u53D1\u5168\u901F\u7ADE\u4EF7\u4E0E Android \u79C1\u4EBA DNS \u539F\u751F\u652F\u6301\u3002
+      </p>
+      <div class="feature-tags">
+        <div class="feature-tag">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          <span>\u5E76\u53D1\u5168\u901F\u7ADE\u4EF7 (Zero Penalty)</span>
+        </div>
+        <div class="feature-tag">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a12 12 0 0 0 8.5 3A12 12 0 0 1 12 21 12 12 0 0 1 3.5 6 12 12 0 0 0 12 3"/></svg>
+          <span>\u53EF\u4FE1\u771F\u5B9E ECS \u6CE8\u5165</span>
+        </div>
+        <div class="feature-tag">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="8" rx="2"/><rect x="3" y="12" width="18" height="8" rx="2"/><line x1="7" y1="8" x2="7.01" y2="8"/><line x1="7" y1="16" x2="7.01" y2="16"/></svg>
+          <span>\u963F\u91CC / \u817E\u8BAF \u76F4\u8FDE\u5206\u6D41</span>
+        </div>
+        <div class="feature-tag">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>
+          <span>Google / CF \u5168\u7403\u515C\u5E95</span>
+        </div>
+        <div class="feature-tag">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+          <span>DNSSEC \u771F\u5B9E AD \u900F\u4F20</span>
+        </div>
+        <div class="feature-tag">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="4" width="10" height="16" rx="2"/><line x1="11" y1="17" x2="13" y2="17"/></svg>
+          <span>Android \u79C1\u4EBA DNS (DoT 853)</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Two-column Main Section: Playground & Endpoints -->
     <div class="grid grid-2">
-      <!-- \u5B9E\u65F6 DNS \u8C03\u8BD5\u5361\u7247 -->
+      <!-- \u5728\u7EBF\u89E3\u6790\u6D4B\u8BD5\u53F0 -->
       <div class="card">
-        <div class="card-title">
-          <span>\u{1F9EA}</span>
-          <span>\u5728\u7EBF\u89E3\u6790\u6D4B\u8BD5\u53F0 (Live Playground)</span>
+        <div class="card-header">
+          <div class="card-title">
+            <span class="card-title-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polygon points="12 6 12 12 16 14"/></svg>
+            </span>
+            <span>\u5728\u7EBF\u89E3\u6790\u6D4B\u8BD5\u53F0 (Live Playground)</span>
+          </div>
+          <div class="view-switcher">
+            <button id="viewFormattedBtn" class="view-btn active" onclick="switchResultView('formatted')">\u7ED3\u6784\u5316\u5361\u7247</button>
+            <button id="viewRawBtn" class="view-btn" onclick="switchResultView('raw')">Raw JSON</button>
+          </div>
         </div>
-        <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:12px;">
-          \u5B9E\u65F6\u6D4B\u8BD5\u57DF\u540D\u5728\u5F53\u524D\u8282\u70B9\u7684\u5206\u6D41\u7B56\u7565\u3001\u89E3\u6790 IP \u4E0E\u54CD\u5E94\u8017\u65F6\uFF1A
+
+        <p style="font-size:0.86rem; color:var(--text-muted); margin-bottom:12px;">
+          \u76F4\u63A5\u5728\u6D4F\u89C8\u5668\u5185\u5411\u7F51\u5173\u53D1\u9001\u89E3\u6790\u8BF7\u6C42\uFF0C\u5B9E\u65F6\u89C2\u6D4B\u5206\u6D41\u51B3\u7B56\u3001\u54CD\u5E94\u8BB0\u5F55\u4E0E\u5B9E\u6D4B\u94FE\u8DEF\u65F6\u5EF6\uFF1A
         </p>
-        <div class="quick-chips">
-          <span class="chip" onclick="setQuery('linux.do')">linux.do (\u56FD\u5185\u7EC4)</span>
-          <span class="chip" onclick="setQuery('github.com')">github.com (\u56FD\u5185\u7EC4)</span>
-          <span class="chip" onclick="setQuery('bilibili.com')">bilibili.com (\u56FD\u5185\u7EC4)</span>
-          <span class="chip" onclick="setQuery('google.com')">google.com (\u5168\u7403\u7EC4)</span>
-          <span class="chip" onclick="setQuery('cloudflare.com')">cloudflare.com (\u5168\u7403\u7EC4)</span>
+
+        <!-- \u5FEB\u6377\u6D4B\u8BD5\u6807\u7B7E -->
+        <div class="chips-group">
+          <span class="chips-label">\u9884\u8BBE:</span>
+          <span class="chip" onclick="setQuery('linux.do', 'A')">linux.do (\u56FD\u5185\u7EC4)</span>
+          <span class="chip" onclick="setQuery('github.com', 'A')">github.com (\u56FD\u5185\u76F4\u8FDE)</span>
+          <span class="chip" onclick="setQuery('bilibili.com', 'A')">bilibili.com (CDN\u8282\u70B9)</span>
+          <span class="chip" onclick="setQuery('google.com', 'A')">google.com (\u5168\u7403\u7EC4)</span>
+          <span class="chip" onclick="setQuery('cloudflare.com', 'A')">cloudflare.com (DNSSEC)</span>
+          <span class="chip" onclick="setQuery('apple.com', 'HTTPS')">apple.com (HTTPS)</span>
         </div>
+
+        <!-- \u67E5\u8BE2\u8F93\u5165\u533A -->
         <div class="input-group">
-          <input type="text" id="domainInput" placeholder="\u8F93\u5165\u5F85\u89E3\u6790\u57DF\u540D (\u5982 linux.do)" value="linux.do">
+          <input type="text" id="domainInput" placeholder="\u8F93\u5165\u5F85\u89E3\u6790\u57DF\u540D (\u5982 linux.do)" value="linux.do" onkeydown="if(event.key==='Enter') runQuery();">
           <select id="typeSelect">
             <option value="A">A</option>
             <option value="AAAA">AAAA</option>
+            <option value="CNAME">CNAME</option>
             <option value="TXT">TXT</option>
-            <option value="HTTPS">HTTPS</option>
+            <option value="HTTPS">HTTPS (Type 65)</option>
+            <option value="MX">MX</option>
+            <option value="NS">NS</option>
+            <option value="SOA">SOA</option>
           </select>
-          <button class="btn" id="queryBtn" onclick="runQuery()">\u67E5\u8BE2</button>
+          <button class="btn" id="queryBtn" onclick="runQuery()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
+            <span>\u67E5\u8BE2</span>
+          </button>
         </div>
-        <div class="result-box" id="resultBox">\u70B9\u51FB\u300C\u67E5\u8BE2\u300D\u67E5\u770B\u771F\u5B9E\u89E3\u6790\u7ED3\u679C\u4E0E\u94FE\u8DEF\u65F6\u5EF6...</div>
+
+        <!-- \u7ED3\u679C\u5C55\u793A\u9762\u677F -->
+        <div class="playground-result" id="playgroundResult">
+          <div style="color:var(--text-faint); font-size:0.85rem; padding: 20px 0; text-align: center;">
+            \u70B9\u51FB\u4E0A\u65B9\u300C\u67E5\u8BE2\u300D\u6216\u5FEB\u6377\u57DF\u540D\u6807\u7B7E\uFF0C\u5F00\u59CB\u5B9E\u65F6\u6D4B\u8BD5...
+          </div>
+        </div>
       </div>
 
-      <!-- \u7AEF\u70B9\u4FE1\u606F\u4E0E\u72B6\u6001\u5361\u7247 -->
+      <!-- \u6838\u5FC3\u7AEF\u70B9\u670D\u52A1\u77E9\u9635 -->
       <div class="card">
-        <div class="card-title">
-          <span>\u{1F4E1}</span>
-          <span>\u670D\u52A1\u63A5\u5165\u7AEF\u70B9</span>
+        <div class="card-header">
+          <div class="card-title">
+            <span class="card-title-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+            </span>
+            <span>\u670D\u52A1\u63A5\u5165\u7AEF\u70B9\u77E9\u9635</span>
+          </div>
+          <span style="font-size:0.78rem; color:var(--text-muted);">\u751F\u4EA7\u5C31\u7EEA</span>
         </div>
-        <div style="margin-bottom: 16px;">
-          <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 4px;">RFC 8484 \u6807\u51C6 DoH URL</div>
-          <div class="code-block" style="padding: 10px 14px;">
+
+        <div style="margin-bottom: 14px;">
+          <div style="display:flex; justify-content:space-between; font-size: 0.82rem; color: var(--text-muted); margin-bottom: 5px;">
+            <span>RFC 8484 \u6807\u51C6 DoH URL</span>
+            <span style="color:var(--primary); font-weight:600;">HTTPS 443</span>
+          </div>
+          <div class="code-block">
             <code>${origin}${config.path}</code>
-            <button class="copy-btn" onclick="copyText('${origin}${config.path}')">\u590D\u5236</button>
+            <button class="copy-btn" onclick="copyText('${origin}${config.path}')">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="11" height="11" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>
+              <span>\u590D\u5236</span>
+            </button>
           </div>
         </div>
-        <div style="margin-bottom: 16px;">
-          <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 4px;">Google \u98CE\u683C JSON API \u7AEF\u70B9</div>
-          <div class="code-block" style="padding: 10px 14px;">
+
+        <div style="margin-bottom: 14px;">
+          <div style="display:flex; justify-content:space-between; font-size: 0.82rem; color: var(--text-muted); margin-bottom: 5px;">
+            <span>RFC 7858 DoT (Android \u79C1\u4EBA DNS)</span>
+            <span style="color:var(--accent-emerald); font-weight:600;">TLS 853</span>
+          </div>
+          <div class="code-block">
+            <code>2fa.mangoqwq.com</code>
+            <button class="copy-btn" onclick="copyText('2fa.mangoqwq.com')">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="11" height="11" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>
+              <span>\u590D\u5236\u4E3B\u673A\u540D</span>
+            </button>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 14px;">
+          <div style="display:flex; justify-content:space-between; font-size: 0.82rem; color: var(--text-muted); margin-bottom: 5px;">
+            <span>Google \u98CE\u683C DoH JSON API</span>
+            <span style="color:var(--text-faint);">RFC 8427 \u517C\u5BB9</span>
+          </div>
+          <div class="code-block">
             <code>${origin}${config.jsonPath}?name=linux.do&type=A</code>
-            <button class="copy-btn" onclick="copyText('${origin}${config.jsonPath}?name=linux.do&type=A')">\u590D\u5236</button>
+            <button class="copy-btn" onclick="copyText('${origin}${config.jsonPath}?name=linux.do&type=A')">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="11" height="11" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>
+              <span>\u590D\u5236</span>
+            </button>
           </div>
         </div>
-        <div style="margin-bottom: 16px;">
-          <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 4px;">\u5065\u5EB7\u68C0\u67E5\u4E0E\u7EDF\u8BA1\u6307\u6807</div>
-          <div class="code-block" style="padding: 10px 14px;">
-            <code>${origin}/healthz</code>
-            <button class="copy-btn" onclick="copyText('${origin}/healthz')">\u590D\u5236</button>
+
+        <div>
+          <div style="display:flex; justify-content:space-between; font-size: 0.82rem; color: var(--text-muted); margin-bottom: 5px;">
+            <span>\u76D1\u63A7\u4E0E\u5EA6\u91CF\u7AEF\u70B9</span>
+            <span style="color:var(--text-faint);">Prometheus / JSON</span>
           </div>
-        </div>
-        <div style="margin-bottom: 16px;">
-          <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 4px;">\u7ADE\u901F\u7EDF\u8BA1 API (JSON)</div>
-          <div class="code-block" style="padding: 10px 14px;">
-            <code>${origin}/api/stats</code>
-            <button class="copy-btn" onclick="copyText('${origin}/api/stats')">\u590D\u5236</button>
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+            <div class="code-block" style="margin-bottom:0;">
+              <code>/healthz</code>
+              <button class="copy-btn" onclick="copyText('${origin}/healthz')">\u590D\u5236</button>
+            </div>
+            <div class="code-block" style="margin-bottom:0;">
+              <code>/api/stats</code>
+              <button class="copy-btn" onclick="copyText('${origin}/api/stats')">\u590D\u5236</button>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- \u{1F4CA} \u4E0A\u6E38\u7ADE\u901F\u4E0E\u5EA6\u91CF\u76D1\u63A7\u5361\u7247 -->
-    <div class="card" style="margin-bottom: 32px;">
-      <div class="card-title" style="justify-content: space-between; flex-wrap: wrap; gap: 10px;">
-        <div style="display: flex; align-items: center; gap: 10px;">
-          <span>\u{1F4CA}</span>
-          <span>\u4E0A\u6E38\u5E76\u53D1\u7ADE\u901F\u4E0E\u5EF6\u8FDF\u76D1\u63A7 (Racing & P95 Metrics)</span>
+    <!-- \u4E0A\u6E38\u5E76\u53D1\u7ADE\u901F\u4E0E\u5EF6\u8FDF\u76D1\u63A7\u5927\u5C4F -->
+    <section class="card" style="margin-bottom: 32px;">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="card-title-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </span>
+          <span>\u4E0A\u6E38\u5E76\u53D1\u7ADE\u901F\u4E0E\u5EF6\u8FDF\u76D1\u63A7 (Racing & P95 Telemetry)</span>
         </div>
         <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-          <div style="display:inline-flex; background:rgba(255,255,255,0.06); border:1px solid var(--card-border); border-radius:8px; padding:2px; gap:2px;">
-            <button id="scopeLocalBtn" class="scope-btn active" onclick="setStatsScope('local')">\u{1F4CD} \u672C\u5730 PoP \u8FB9\u7F18</button>
-            <button id="scopeGlobalBtn" class="scope-btn" onclick="setStatsScope('global')">\u{1F310} \u5168\u7403\u591A\u5730\u57DF\u805A\u5408</button>
+          <div class="view-switcher" style="margin-left:0;">
+            <button id="scopeLocalBtn" class="view-btn active" onclick="setStatsScope('local')">
+              <span>\u672C\u5730 PoP \u8FB9\u7F18</span>
+            </button>
+            <button id="scopeGlobalBtn" class="view-btn" onclick="setStatsScope('global')">
+              <span>\u5168\u7403\u591A\u5730\u57DF\u805A\u5408</span>
+            </button>
           </div>
-          <button class="btn" style="padding: 5px 12px; font-size: 0.8rem;" onclick="loadStats()">
-            <span>\u{1F504}</span><span>\u5237\u65B0\u6307\u6807</span>
+          <label style="display:inline-flex; align-items:center; gap:6px; font-size:0.8rem; color:var(--text-muted); cursor:pointer;">
+            <input type="checkbox" id="autoRefreshCheckbox" onchange="toggleAutoRefresh(this.checked)" checked>
+            <span>\u81EA\u52A8\u5237\u65B0 (10s)</span>
+          </label>
+          <button class="btn btn-secondary" style="padding: 5px 12px; font-size: 0.8rem;" id="refreshStatsBtn" onclick="loadStats()">
+            <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 0 0-14.5-4L3 10m0-5v5h5M4 13a8 8 0 0 0 14.5 4L21 14m0 5v-5h-5"/></svg>
+            <span>\u5237\u65B0\u6307\u6807</span>
           </button>
         </div>
       </div>
-      <div id="scopeNotice" style="font-size:0.82rem; color:var(--text-muted); margin-bottom:12px; padding:6px 12px; background:rgba(255,255,255,0.03); border-radius:6px; border-left:3px solid var(--primary);">
-        \u{1F4CD} \u7EDF\u8BA1\u8303\u56F4\uFF1A\u5F53\u524D Cloudflare \u8FB9\u7F18\u8282\u70B9\u5185\u5B58\u5B9E\u65F6\u91C7\u6837 (\u5355\u5B9E\u4F8B)
-      </div>
-      <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:16px;">
-        \u6240\u6709\u4E0A\u6E38\u5E76\u53D1\u540C\u65F6\u53D1\u8D77\u8BF7\u6C42\uFF0C\u5EF6\u8FDF\u7531\u6700\u5FEB\u8282\u70B9\u51B3\u5B9A\u3002\u5B9E\u65F6\u7EDF\u8BA1\u5404\u4E0A\u6E38\u7684\u80DC\u51FA\u6BD4\u4F8B\u3001P50 / P95 \u89E3\u6790\u5EF6\u8FDF\u53CA\u8FB9\u7F18\u7F13\u5B58\u6548\u7387\u3002
-      </p>
 
-      <div class="grid grid-2" style="margin-bottom: 16px;">
-        <!-- \u56FD\u5185\u7EC4\u5BF9\u6BD4 -->
-        <div style="background:var(--code-bg); padding:16px; border-radius:10px; border:1px solid var(--card-border);">
-          <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-weight:600; font-size:0.9rem;">
-            <span>\u{1F1E8}\u{1F1F3} \u56FD\u5185\u7EC4\u7ADE\u901F (AliDNS vs DNSPod)</span>
-            <span id="domesticTotalWins" style="color:var(--text-muted); font-size:0.8rem;">0 \u80DC\u51FA</span>
+      <div id="scopeNotice" style="font-size:0.82rem; color:var(--text-muted); margin-bottom:16px; padding:8px 14px; background:rgba(255,255,255,0.03); border-radius:8px; border-left:3px solid var(--primary);">
+        \u7EDF\u8BA1\u8303\u56F4\uFF1A\u5F53\u524D Cloudflare \u8FB9\u7F18\u8282\u70B9\u5185\u5B58\u5B9E\u65F6\u91C7\u6837 (\u5355\u5B9E\u4F8B)
+      </div>
+
+      <div class="grid grid-2" style="margin-bottom: 20px;">
+        <!-- \u56FD\u5185\u7EC4\u7ADE\u901F\u770B\u677F -->
+        <div style="background:var(--code-bg); padding:18px; border-radius:12px; border:1px solid var(--card-border);">
+          <div class="metric-row">
+            <span style="display:flex; align-items:center; gap:6px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="8" rx="2"/><rect x="3" y="12" width="18" height="8" rx="2"/><line x1="7" y1="8" x2="7.01" y2="8"/><line x1="7" y1="16" x2="7.01" y2="16"/></svg>
+              <span>\u56FD\u5185\u7EC4\u7ADE\u901F (AliDNS vs DNSPod)</span>
+            </span>
+            <span id="domesticTotalWins" style="color:var(--text-muted); font-size:0.82rem; font-weight:normal;">0 \u6B21\u80DC\u51FA</span>
           </div>
-          <div style="display:flex; height:10px; border-radius:9999px; overflow:hidden; background:rgba(255,255,255,0.1); margin-bottom:8px;">
-            <div id="barAlidns" style="width:50%; background:#3b82f6; transition:width 0.4s;"></div>
-            <div id="barDohpub" style="width:50%; background:#10b981; transition:width 0.4s;"></div>
+          <div class="progress-bar-container">
+            <div id="barAlidns" class="progress-bar-fill" style="width:50%; background:#3b82f6;"></div>
+            <div id="barDohpub" class="progress-bar-fill" style="width:50%; background:#10b981;"></div>
           </div>
-          <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:var(--text-muted);">
-            <span><span style="color:#3b82f6;">\u25CF</span> \u963F\u91CC DNS: <b id="winAlidns">0 (0.0%)</b></span>
-            <span><span style="color:#10b981;">\u25CF</span> \u817E\u8BAF DNSPod: <b id="winDohpub">0 (0.0%)</b></span>
+          <div style="display:flex; justify-content:space-between; font-size:0.82rem; color:var(--text-muted);">
+            <span><span style="color:#3b82f6;">\u25CF</span> \u963F\u91CC DNS: <b id="winAlidns" style="color:var(--text);">0 (0.0%)</b></span>
+            <span><span style="color:#10b981;">\u25CF</span> \u817E\u8BAF DNSPod: <b id="winDohpub" style="color:var(--text);">0 (0.0%)</b></span>
           </div>
-          <div style="margin-top:12px; padding-top:8px; border-top:1px dashed var(--card-border); font-size:0.8rem; display:flex; justify-content:space-between;">
-            <span>P50: <b id="p50Domestic">- ms</b></span>
-            <span>P95: <b id="p95Domestic" style="color:#f59e0b;">- ms</b></span>
-            <span>Avg: <b id="avgDomestic">- ms</b></span>
+          <div class="latency-grid">
+            <div>P50 \u65F6\u5EF6<b id="p50Domestic">- ms</b></div>
+            <div>P95 \u65F6\u5EF6<b id="p95Domestic" style="color:#f59e0b;">- ms</b></div>
+            <div>\u5E73\u5747\u65F6\u5EF6<b id="avgDomestic">- ms</b></div>
           </div>
         </div>
 
-        <!-- \u5168\u7403\u7EC4\u5BF9\u6BD4 -->
-        <div style="background:var(--code-bg); padding:16px; border-radius:10px; border:1px solid var(--card-border);">
-          <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-weight:600; font-size:0.9rem;">
-            <span>\u{1F310} \u5168\u7403\u7EC4\u7ADE\u901F (Google vs Cloudflare)</span>
-            <span id="globalTotalWins" style="color:var(--text-muted); font-size:0.8rem;">0 \u80DC\u51FA</span>
+        <!-- \u5168\u7403\u7EC4\u7ADE\u901F\u770B\u677F -->
+        <div style="background:var(--code-bg); padding:18px; border-radius:12px; border:1px solid var(--card-border);">
+          <div class="metric-row">
+            <span style="display:flex; align-items:center; gap:6px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>
+              <span>\u5168\u7403\u7EC4\u7ADE\u901F (Google vs Cloudflare)</span>
+            </span>
+            <span id="globalTotalWins" style="color:var(--text-muted); font-size:0.82rem; font-weight:normal;">0 \u6B21\u80DC\u51FA</span>
           </div>
-          <div style="display:flex; height:10px; border-radius:9999px; overflow:hidden; background:rgba(255,255,255,0.1); margin-bottom:8px;">
-            <div id="barGoogle" style="width:50%; background:#8b5cf6; transition:width 0.4s;"></div>
-            <div id="barCf" style="width:50%; background:#f97316; transition:width 0.4s;"></div>
+          <div class="progress-bar-container">
+            <div id="barGoogle" class="progress-bar-fill" style="width:50%; background:#8b5cf6;"></div>
+            <div id="barCf" class="progress-bar-fill" style="width:50%; background:#f97316;"></div>
           </div>
-          <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:var(--text-muted);">
-            <span><span style="color:#8b5cf6;">\u25CF</span> Google DNS: <b id="winGoogle">0 (0.0%)</b></span>
-            <span><span style="color:#f97316;">\u25CF</span> Cloudflare: <b id="winCf">0 (0.0%)</b></span>
+          <div style="display:flex; justify-content:space-between; font-size:0.82rem; color:var(--text-muted);">
+            <span><span style="color:#8b5cf6;">\u25CF</span> Google DNS: <b id="winGoogle" style="color:var(--text);">0 (0.0%)</b></span>
+            <span><span style="color:#f97316;">\u25CF</span> Cloudflare: <b id="winCf" style="color:var(--text);">0 (0.0%)</b></span>
           </div>
-          <div style="margin-top:12px; padding-top:8px; border-top:1px dashed var(--card-border); font-size:0.8rem; display:flex; justify-content:space-between;">
-            <span>P50: <b id="p50Global">- ms</b></span>
-            <span>P95: <b id="p95Global" style="color:#f59e0b;">- ms</b></span>
-            <span>Avg: <b id="avgGlobal">- ms</b></span>
+          <div class="latency-grid">
+            <div>P50 \u65F6\u5EF6<b id="p50Global">- ms</b></div>
+            <div>P95 \u65F6\u5EF6<b id="p95Global" style="color:#f59e0b;">- ms</b></div>
+            <div>\u5E73\u5747\u65F6\u5EF6<b id="avgGlobal">- ms</b></div>
           </div>
         </div>
       </div>
 
-      <div style="display:flex; flex-wrap:wrap; gap:16px; font-size:0.82rem; color:var(--text-muted);">
-        <span>\u{1F4E6} \u8FB9\u7F18\u7F13\u5B58\u547D\u4E2D\u7387: <b id="cacheHitRate" style="color:var(--accent);">0.0%</b></span>
-        <span>\u{1F4C8} \u7D2F\u8BA1\u670D\u52A1\u8BF7\u6C42: <b id="totalRequests" style="color:var(--text);">0</b></span>
-        <span id="uptimeWrap">\u23F1\uFE0F \u8282\u70B9\u8FD0\u884C\u65F6\u95F4: <b id="nodeUptime" style="color:var(--text);">0s</b></span>
-        <span>\u2601\uFE0F Analytics Engine: <b id="analyticsStatus" style="color:var(--primary);">\u5DF2\u63A5\u5165 (Worker \u70B9\u4F4D\u5199\u5165)</b></span>
+      <!-- \u6982\u89C8\u6307\u6807\u884C -->
+      <div style="display:flex; flex-wrap:wrap; gap:20px; font-size:0.85rem; color:var(--text-muted); padding-top:4px;">
+        <span style="display:inline-flex; align-items:center; gap:6px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3m0 12v3M3 12h3m12 0h3"/></svg>
+          <span>\u8FB9\u7F18 LRU \u7F13\u5B58\u547D\u4E2D\u7387:</span> <b id="cacheHitRate" style="color:var(--accent-emerald);">0.0%</b>
+        </span>
+        <span style="display:inline-flex; align-items:center; gap:6px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          <span>\u7D2F\u8BA1\u89E3\u6790\u670D\u52A1\u6570:</span> <b id="totalRequests" style="color:var(--text);">0</b>
+        </span>
+        <span id="uptimeWrap" style="display:inline-flex; align-items:center; gap:6px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span>\u5B9E\u4F8B\u8FD0\u884C\u65F6\u95F4:</span> <b id="nodeUptime" style="color:var(--text);">0s</b>
+        </span>
+        <span style="display:inline-flex; align-items:center; gap:6px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>
+          <span>Analytics Engine:</span> <b id="analyticsStatus" style="color:var(--primary);">\u5DF2\u63A5\u5165 (Worker \u70B9\u4F4D\u5199\u5165)</b>
+        </span>
       </div>
-    </div>
+    </section>
 
-    <!-- \u5BA2\u6237\u7AEF\u4E00\u952E\u914D\u7F6E\u5361\u7247 -->
-    <div class="card" style="margin-bottom: 32px;">
-      <div class="card-title">
-        <span>\u2699\uFE0F</span>
-        <span>\u5168\u5E73\u53F0\u5BA2\u6237\u7AEF\u63A5\u5165\u6307\u5357</span>
-      </div>
-      <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('clash')">Clash / Mihomo</button>
-        <button class="tab-btn" onclick="switchTab('surge')">Surge</button>
-        <button class="tab-btn" onclick="switchTab('shadowrocket')">Shadowrocket</button>
-        <button class="tab-btn" onclick="switchTab('apple')">iOS / macOS</button>
-        <button class="tab-btn" onclick="switchTab('android')">Android / Windows</button>
-        <button class="tab-btn" onclick="switchTab('cli')">cURL / dig \u8C03\u8BD5</button>
+    <!-- \u5168\u5E73\u53F0\u5BA2\u6237\u7AEF\u63A5\u5165\u6307\u5357 -->
+    <section class="card" style="margin-bottom: 32px;">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="card-title-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
+          </span>
+          <span>\u5168\u5E73\u53F0\u5BA2\u6237\u7AEF\u63A5\u5165\u6307\u5357</span>
+        </div>
+        <span style="font-size:0.8rem; color:var(--text-muted);">\u4E00\u952E\u590D\u5236\u914D\u7F6E</span>
       </div>
 
-      <div id="tab-clash" class="tab-content">
+      <div class="tabs-header">
+        <button class="tab-btn active" onclick="switchClientTab('mihomo')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9" r="1.5"/></svg>
+          <span>Clash / Mihomo</span>
+        </button>
+        <button class="tab-btn" onclick="switchClientTab('surge')">Surge</button>
+        <button class="tab-btn" onclick="switchClientTab('singbox')">Sing-box</button>
+        <button class="tab-btn" onclick="switchClientTab('shadowrocket')">Shadowrocket</button>
+        <button class="tab-btn" onclick="switchClientTab('android')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="4" width="10" height="16" rx="2"/><line x1="11" y1="17" x2="13" y2="17"/></svg>
+          <span>Android (\u79C1\u4EBA DNS)</span>
+        </button>
+        <button class="tab-btn" onclick="switchClientTab('windows')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></svg>
+          <span>Windows 11 / dnscrypt</span>
+        </button>
+        <button class="tab-btn" onclick="switchClientTab('apple')">iOS / macOS</button>
+        <button class="tab-btn" onclick="switchClientTab('linux')">Linux (resolved)</button>
+        <button class="tab-btn" onclick="switchClientTab('cli')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+          <span>cURL / dig \u8C03\u8BD5</span>
+        </button>
+      </div>
+
+      <!-- Tab Mihomo / Clash -->
+      <div id="tab-mihomo" class="client-tab-content">
+        <div style="font-size:0.85rem; color:var(--text-muted); margin-bottom:10px;">
+          \u9002\u7528\u4E8E Mihomo (Clash Verge Rev / Mihomo Party / ShellCrash)\u3002\u6CE8\u610F <code>default-nameserver</code> \u5FC5\u987B\u4E3A\u7EAF IP \u4EE5\u9632\u6B7B\u5FAA\u73AF\u3002
+        </div>
         <div class="code-block">
-          <button class="copy-btn" onclick="copyElement('code-clash')">\u590D\u5236\u4EE3\u7801</button>
-          <pre id="code-clash"><code>dns:
+          <button class="copy-btn" onclick="copyElement('code-mihomo')">\u590D\u5236\u4EE3\u7801</button>
+          <pre id="code-mihomo"><code>dns:
   enable: true
   listen: 0.0.0.0:1053
   enhanced-mode: fake-ip
@@ -1766,11 +2317,17 @@ function renderLandingHtml(origin, config) {
     - "${origin}${config.path}"
   default-nameserver:
     - 223.5.5.5
-    - 119.29.29.29</code></pre>
+    - 119.29.29.29
+  proxy-server-nameserver:
+    - 223.5.5.5
+  nameserver-policy:
+    "doh.mangoqwq.com":
+      - 223.5.5.5</code></pre>
         </div>
       </div>
 
-      <div id="tab-surge" class="tab-content" style="display:none;">
+      <!-- Tab Surge -->
+      <div id="tab-surge" class="client-tab-content" style="display:none;">
         <div class="code-block">
           <button class="copy-btn" onclick="copyElement('code-surge')">\u590D\u5236\u4EE3\u7801</button>
           <pre id="code-surge"><code>[General]
@@ -1780,107 +2337,334 @@ doh-format = wire</code></pre>
         </div>
       </div>
 
-      <div id="tab-shadowrocket" class="tab-content" style="display:none;">
+      <!-- Tab Sing-box -->
+      <div id="tab-singbox" class="client-tab-content" style="display:none;">
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyElement('code-singbox')">\u590D\u5236\u4EE3\u7801</button>
+          <pre id="code-singbox"><code>{
+  "dns": {
+    "servers": [
+      {
+        "tag": "cf-doh",
+        "address": "${origin}${config.path}",
+        "detour": "direct"
+      },
+      {
+        "tag": "local-bootstrap",
+        "address": "223.5.5.5",
+        "detour": "direct"
+      }
+    ],
+    "rules": [
+      {
+        "domain": ["doh.mangoqwq.com"],
+        "server": "local-bootstrap"
+      }
+    ],
+    "strategy": "prefer_ipv4"
+  }
+}</code></pre>
+        </div>
+      </div>
+
+      <!-- Tab Shadowrocket -->
+      <div id="tab-shadowrocket" class="client-tab-content" style="display:none;">
         <div class="code-block">
           <button class="copy-btn" onclick="copyElement('code-shadowrocket')">\u590D\u5236\u4EE3\u7801</button>
-          <pre id="code-shadowrocket"><code># \u8FDB\u5165 Shadowrocket -> \u8BBE\u7F6E -> DNS -> \u542F\u7528 DNS-over-HTTPS
-DNS \u670D\u52A1\u5668 URL:
+          <pre id="code-shadowrocket"><code># 1. \u6253\u5F00 Shadowrocket -> \u8BBE\u7F6E -> DNS
+# 2. \u542F\u7528\u300CDNS-over-HTTPS\u300D
+# 3. \u5728 DNS \u670D\u52A1\u5668 URL \u586B\u5165\uFF1A
 ${origin}${config.path}</code></pre>
         </div>
       </div>
 
-      <div id="tab-apple" class="tab-content" style="display:none;">
+      <!-- Tab Android -->
+      <div id="tab-android" class="client-tab-content" style="display:none;">
+        <div style="font-size:0.85rem; color:var(--text-muted); margin-bottom:10px;">
+          \u63A8\u8350\u65B9\u5F0F\u4E00\uFF08RFC 7858 DoT\uFF09\uFF1A\u7CFB\u7EDF\u5E95\u5C42\u5168\u5C40\u751F\u6548\u3001\u96F6\u8017\u7535\u3001\u9632\u6C61\u67D3\u3002
+        </div>
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyText('2fa.mangoqwq.com')">\u590D\u5236\u4E3B\u673A\u540D</button>
+          <pre><code># \u65B9\u5F0F\u4E00\uFF1A\u7CFB\u7EDF\u7EA7\u79C1\u4EBA DNS (Android 9+ / \u63A8\u8350)
+\u8BBE\u7F6E -> \u8FDE\u63A5\u4E0E\u5171\u4EAB / \u7F51\u7EDC\u548C\u4E92\u8054\u7F51 -> \u79C1\u4EBA DNS (Private DNS) -> \u9009\u62E9\u300C\u6307\u5B9A\u4E3B\u673A\u540D\u300D\uFF1A
+2fa.mangoqwq.com
+
+# \u65B9\u5F0F\u4E8C\uFF1AChrome / Edge \u7B49\u6D4F\u89C8\u5668\u7AEF\u5B89\u5168 DNS (DoH)
+\u8BBE\u7F6E -> \u9690\u79C1\u548C\u5B89\u5168\u6027 -> \u4F7F\u7528\u5B89\u5168 DNS -> \u9009\u62E9\u63D0\u4F9B\u5546 -> \u81EA\u5B9A\u4E49\uFF1A
+${origin}${config.path}</code></pre>
+        </div>
+      </div>
+
+      <!-- Tab Windows -->
+      <div id="tab-windows" class="client-tab-content" style="display:none;">
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyElement('code-win')">\u590D\u5236\u4EE3\u7801</button>
+          <pre id="code-win"><code># \u65B9\u6848 A\uFF1AWindows 11 \u539F\u751F\u5B89\u5168 DNS (\u52A0\u5BC6\u901A\u8FC7 HTTPS)
+# \u8BBE\u7F6E -> \u7F51\u7EDC\u548C Internet -> \u5C5E\u6027 -> DNS \u670D\u52A1\u5668\u5206\u914D (\u624B\u52A8) -> \u542F\u7528\u300C\u4EC5\u52A0\u5BC6\u300D
+DoH \u6A21\u677F URL:
+${origin}${config.path}
+
+# \u65B9\u6848 B\uFF1Adnscrypt-proxy (\u81EA\u5EFA\u65E0\u7F1D\u5B88\u62A4)
+# Stamp (sdns):
+sdns://AgEAAAAAAAAAAAAQZG9oLm1hbmdvcXdxLmNvbQQvZG9o</code></pre>
+        </div>
+      </div>
+
+      <!-- Tab Apple -->
+      <div id="tab-apple" class="client-tab-content" style="display:none;">
         <div class="code-block">
           <button class="copy-btn" onclick="copyElement('code-apple')">\u590D\u5236\u4EE3\u7801</button>
           <pre id="code-apple"><code># iOS 14+ / macOS 11+ \u539F\u751F\u652F\u6301 DoH \u63CF\u8FF0\u6587\u4EF6 (.mobileconfig)
 # \u5BF9\u5E94 DoH \u670D\u52A1\u5668\u5730\u5740:
 ${origin}${config.path}
 
-# \u53EF\u4EE5\u5728 Safari \u6253\u5F00\uFF0C\u6216\u4F7F\u7528 Apple Configurator \u751F\u6210\u63CF\u8FF0\u6587\u4EF6\u3002</code></pre>
+# \u4EA6\u53EF\u5728 Safari / \u6D4F\u89C8\u5668\u4E2D\u4F5C\u4E3A\u5B89\u5168 DNS \u63D0\u4F9B\u5546\u914D\u7F6E\u3002</code></pre>
         </div>
       </div>
 
-      <div id="tab-android" class="tab-content" style="display:none;">
+      <!-- Tab Linux -->
+      <div id="tab-linux" class="client-tab-content" style="display:none;">
         <div class="code-block">
-          <button class="copy-btn" onclick="copyElement('code-android')">\u590D\u5236\u4EE3\u7801</button>
-          <pre id="code-android"><code># Android 13+ (Private DNS / \u73B0\u4EE3\u6D4F\u89C8\u5668\u8BBE\u7F6E)
-# Chrome / Edge: \u8BBE\u7F6E -> \u9690\u79C1\u548C\u5B89\u5168\u6027 -> \u4F7F\u7528\u5B89\u5168 DNS -> \u9009\u62E9\u63D0\u4F9B\u5546 -> \u81EA\u5B9A\u4E49:
-${origin}${config.path}
+          <button class="copy-btn" onclick="copyElement('code-linux')">\u590D\u5236\u4EE3\u7801</button>
+          <pre id="code-linux"><code># Linux \u751F\u4EA7\u63A5\u5165\u6700\u4F73\u5B9E\u8DF5 (dnscrypt-proxy \u672C\u5730\u73AF\u56DE + systemd-resolved)
+# /etc/systemd/resolved.conf.d/doh.conf:
+[Resolve]
+DNS=127.0.0.1:5053
+Domains=~.
 
-# Windows 11: \u8BBE\u7F6E -> \u7F51\u7EDC\u548C Internet -> \u4EE5\u592A\u7F51/WLAN -> \u786C\u4EF6\u5C5E\u6027 -> DNS \u670D\u52A1\u5668\u5206\u914D:
-# \u9009\u62E9\u624B\u52A8 -> IPv4/IPv6 \u5F00 -> \u586B\u5199 DNS \u5E76\u5F00\u542F\u300C\u4EC5\u52A0\u5BC6 (\u901A\u8FC7 HTTPS \u7684 DNS)\u300D
-\u6A21\u677F URL: ${origin}${config.path}</code></pre>
+# dnscrypt-proxy \u76D1\u542C 127.0.0.1:5053 \u5E76\u4F7F\u7528 Stamp\uFF1A
+sdns://AgEAAAAAAAAAAAAQZG9oLm1hbmdvcXdxLmNvbQQvZG9o</code></pre>
         </div>
       </div>
 
-      <div id="tab-cli" class="tab-content" style="display:none;">
+      <!-- Tab CLI -->
+      <div id="tab-cli" class="client-tab-content" style="display:none;">
         <div class="code-block">
           <button class="copy-btn" onclick="copyElement('code-cli')">\u590D\u5236\u4EE3\u7801</button>
-          <pre id="code-cli"><code># 1. \u5FEB\u901F\u5065\u5EB7\u68C0\u67E5
+          <pre id="code-cli"><code># 1. \u670D\u52A1\u5065\u5EB7\u63A2\u6D4B\u4E0E\u5F53\u524D\u7248\u672C
 curl -s "${origin}/healthz"
 
-# 2. \u901A\u8FC7 JSON API \u5FEB\u901F\u89E3\u6790
+# 2. \u901A\u8FC7 JSON API \u5FEB\u901F\u89E3\u6790 A \u8BB0\u5F55
 curl -s "${origin}${config.jsonPath}?name=linux.do&type=A"
 
-# 3. \u4F7F\u7528 kdig (knot-dnsutils) \u6D4B\u8BD5\u6807\u51C6 DoH
-kdig -d @${new URL(origin).hostname} +https=${config.path} linux.do A</code></pre>
-        </div>
-      </div>
-    </div>
+# 3. kdig (knot-dnsutils) \u6807\u51C6 RFC 8484 \u67E5\u8BE2
+kdig -d @${new URL(origin).hostname} +https=${config.path} linux.do A
 
-    <!-- \u6838\u5FC3\u4F18\u52BF -->
-    <div class="card">
-      <div class="card-title">
-        <span>\u{1F4A1}</span>
-        <span>\u4E3A\u4EC0\u4E48\u9009\u62E9 cf-doh\uFF1F</span>
-      </div>
-      <div class="feature-list">
-        <div class="feature-item">
-          <div class="feature-icon">\u{1F3CE}\uFE0F</div>
-          <div>
-            <strong>\u5168\u5E76\u53D1\u7ADE\u4EF7 (Zero Penalty)</strong>
-            <p style="font-size:0.85rem; color:var(--text-muted);">
-              \u56FD\u5185\u7EC4\u4E0E\u5168\u7403\u7EC4\u5185\u6240\u6709\u4E0A\u6E38\u540C\u65F6\u5E76\u53D1\u8BF7\u6C42\uFF0C\u5EF6\u8FDF\u53D6\u6700\u5C0F\u503C\u3002\u5F7B\u5E95\u7EC8\u7ED3\u4F20\u7EDF\u65B9\u6848\u4E32\u884C\u8D85\u65F6\u5361\u987F\u3002
-            </p>
-          </div>
-        </div>
-        <div class="feature-item">
-          <div class="feature-icon">\u{1F3AF}</div>
-          <div>
-            <strong>\u771F\u5B9E\u53EF\u4FE1 ECS \u6CE8\u5165</strong>
-            <p style="font-size:0.85rem; color:var(--text-muted);">
-              \u4E25\u683C\u4FE1\u4EFB Cloudflare \u8FB9\u7F18\u63D0\u53D6\u7684 client IP\uFF08/24 \u6216 /56\uFF09\uFF0C\u8FC7\u6EE4\u53EF\u4F2A\u9020\u7684 XFF\uFF0C\u8BA9 CDN \u8C03\u5EA6\u7CBE\u51C6\u9501\u5B9A\u6700\u8FD1\u8282\u70B9\u3002
-            </p>
-          </div>
-        </div>
-        <div class="feature-item">
-          <div class="feature-icon">\u{1F6E1}\uFE0F</div>
-          <div>
-            <strong>\u89C4\u5219\u9632\u6BD2\u5316\u4E0E\u786C\u9694\u79BB</strong>
-            <p style="font-size:0.85rem; color:var(--text-muted);">
-              \u5185\u7F6E linux.do / github.com \u7EDD\u5BF9\u76F4\u8FDE\u786C\u7F16\u7801\u9632\u62A4\uFF0C\u5916\u90E8\u89C4\u5219\u5931\u6548\u6216\u683C\u5F0F\u5F02\u5E38\u5E73\u6ED1\u56DE\u9000\uFF0C\u4FDD\u969C\u670D\u52A1\u6C38\u8FDC\u53EF\u7528\u3002
-            </p>
-          </div>
-        </div>
-        <div class="feature-item">
-          <div class="feature-icon">\u{1F4E6}</div>
-          <div>
-            <strong>\u96F6\u8FD0\u884C\u65F6\u4F9D\u8D56 & \u5F00\u7BB1\u5373\u7528</strong>
-            <p style="font-size:0.85rem; color:var(--text-muted);">
-              \u7EAF\u539F\u751F JavaScript ESM \u5B9E\u73B0\uFF0C\u65E0\u8BBA\u514D\u8D39\u7248\u8FD8\u662F\u4F01\u4E1A\u7248 Cloudflare Workers\uFF0C\u5355\u6587\u4EF6\u6216 Wrangler \u5747\u53EF\u79D2\u7EA7\u542F\u52A8\u3002
-            </p>
-          </div>
+# 4. doggo \u547D\u4EE4\u884C\u5DE5\u5177\u6D4B\u8BD5
+doggo linux.do @${origin}${config.path} --doh</code></pre>
         </div>
       </div>
-    </div>
+    </section>
 
-    <footer class="footer">
-      <p>\u5F00\u6E90\u9879\u76EE\uFF1A<a href="https://github.com/dengyie/cf-doh" target="_blank" rel="noopener">github.com/dengyie/cf-doh</a> \u2022 \u57FA\u4E8E MIT License \u5F00\u6E90</p>
-      <p style="margin-top: 6px; font-size: 0.8rem;">Powered by Cloudflare Workers & Serverless Edge Computing</p>
-    </footer>
+    <!-- \u67B6\u6784\u4E0E\u6838\u5FC3\u4F18\u52BF\u7F51\u683C -->
+    <section class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="card-title-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a12 12 0 0 0 8.5 3A12 12 0 0 1 12 21 12 12 0 0 1 3.5 6 12 12 0 0 0 12 3"/></svg>
+          </span>
+          <span>\u6838\u5FC3\u67B6\u6784\u4E0E\u6280\u672F\u4FDD\u969C</span>
+        </div>
+        <span style="font-size:0.8rem; color:var(--text-muted);">\u4E3A\u4EC0\u4E48\u9009\u62E9 cf-doh\uFF1F</span>
+      </div>
+
+      <div class="grid grid-2" style="margin-bottom:0;">
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <div>
+            <strong style="font-size:0.96rem; display:block; margin-bottom:4px;">\u5168\u5E76\u53D1\u7ADE\u4EF7 (Zero Wait Racing)</strong>
+            <p style="font-size:0.85rem; color:var(--text-muted);">
+              \u56FD\u5185\u7EC4\u4E0E\u5168\u7403\u7EC4\u540C\u7EC4\u6240\u6709\u4E0A\u6E38\u5E76\u53D1 fan-out \u53D1\u8D77\u67E5\u8BE2\uFF0C\u54CD\u5E94\u65F6\u95F4\u53D6\u6700\u5FEB\u4E0A\u6E38\u9996\u5305\uFF0C\u6162\u4E0A\u6E38\u81EA\u52A8 Abort\uFF0C\u5F7B\u5E95\u544A\u522B\u5355\u70B9\u8D85\u65F6\u5361\u987F\u3002
+            </p>
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a12 12 0 0 0 8.5 3A12 12 0 0 1 12 21 12 12 0 0 1 3.5 6 12 12 0 0 0 12 3"/></svg>
+          </div>
+          <div>
+            <strong style="font-size:0.96rem; display:block; margin-bottom:4px;">\u53EF\u4FE1\u771F\u5B9E ECS \u6CE8\u5165</strong>
+            <p style="font-size:0.85rem; color:var(--text-muted);">
+              \u4E25\u683C\u57FA\u4E8E Cloudflare \u8FB9\u7F18\u53EF\u4FE1\u62A5\u5934\u6CE8\u5165 IPv4 /24 \u4E0E IPv6 /56 \u5BA2\u6237\u7AEF\u5B50\u7F51\uFF0C\u675C\u7EDD\u4F2A\u9020 XFF \u6B3A\u9A97\uFF0C\u5F15\u5BFC\u6743\u5A01 CDN \u7CBE\u51C6\u5C31\u8FD1\u8C03\u5EA6\u3002
+            </p>
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9" r="1.5"/></svg>
+          </div>
+          <div>
+            <strong style="font-size:0.96rem; display:block; margin-bottom:4px;">\u9632\u6C61\u67D3\u786C\u9694\u79BB\u4E0E\u89C4\u5219\u81EA\u6108</strong>
+            <p style="font-size:0.85rem; color:var(--text-muted);">
+              \u5185\u7F6E linux.do \u4E0E github.com \u76F4\u8FDE\u786C\u7F16\u7801\u4FDD\u62A4\u3002\u5916\u90E8\u89C4\u5219\u96C6\u89E3\u6790\u5F02\u5E38\u6216\u7F51\u7EDC\u4E2D\u65AD\u65F6\u81EA\u52A8\u51B7\u5374\u964D\u7EA7\uFF0C\u786E\u4FDD\u6838\u5FC3\u57FA\u7840\u670D\u52A1\u6C38\u4E0D\u6389\u7EBF\u3002
+            </p>
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m14 5h5v5M19 5l-8 8M19 14v3a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h3"/></svg>
+          </div>
+          <div>
+            <strong style="font-size:0.96rem; display:block; margin-bottom:4px;">\u96F6\u5916\u90E8\u4F9D\u8D56 & \u6BEB\u79D2\u7EA7\u51B7\u542F</strong>
+            <p style="font-size:0.85rem; color:var(--text-muted);">
+              \u7EAF\u539F\u751F JavaScript ESM \u5B9E\u73B0\uFF0C\u96F6\u91CD\u91CF\u7EA7\u6846\u67B6\u4FB5\u5165\uFF0C\u65E0\u8BBA\u662F\u514D\u8D39\u7248\u8FD8\u662F\u4F01\u4E1A\u7248 Cloudflare Workers\uFF0C\u5355\u6587\u4EF6 bundle \u5747\u53EF\u79D2\u7EA7\u542F\u52A8\u3002
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-links">
+      <a href="https://github.com/dengyie/cf-doh" target="_blank" rel="noopener">
+        <span>GitHub \u6E90\u7801\u4ED3\u5E93</span>
+      </a>
+      <span>\u2022</span>
+      <a href="${origin}/healthz" target="_blank" rel="noopener">\u670D\u52A1\u5065\u5EB7\u63A2\u9488 (/healthz)</a>
+      <span>\u2022</span>
+      <a href="${origin}/api/stats" target="_blank" rel="noopener">\u5B9E\u65F6\u5EA6\u91CF API (/api/stats)</a>
+    </div>
+    <p style="font-size:0.82rem; color:var(--text-faint);">
+      cf-doh \u2022 \u57FA\u4E8E MIT License \u5F00\u6E90 \u2022 Powered by Cloudflare Workers & Serverless Edge Computing
+    </p>
+  </footer>
+
+  <!-- Toast Element -->
+  <div id="toast" class="toast">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg>
+    <span id="toastMsg">\u5DF2\u590D\u5236</span>
   </div>
 
+  <!-- Client-side Logic & Web Components -->
   <script>
+    // ---- Web Component: <theme-toggle> --------------------------------------
+    class ThemeToggle extends HTMLElement {
+      connectedCallback() {
+        this.storageKey = this.getAttribute('storage-key') || 'cf-doh-theme';
+        this.mode = localStorage.getItem(this.storageKey) || 'auto';
+        this.render();
+        this.applyTheme(this.mode, false);
+        this.bindEvents();
+      }
+      resolveTheme(m) {
+        if (m === 'light' || m === 'dark') return m;
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      applyTheme(nextMode, notify = true) {
+        this.mode = nextMode;
+        var resolved = this.resolveTheme(nextMode);
+        document.documentElement.dataset.theme = nextMode;
+        document.documentElement.dataset.resolvedTheme = resolved;
+        if (resolved === 'dark') {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+        localStorage.setItem(this.storageKey, nextMode);
+        this.updateActiveButtons();
+      }
+      updateActiveButtons() {
+        var btns = this.querySelectorAll('[data-mode]');
+        for (var i = 0; i < btns.length; i++) {
+          var btn = btns[i];
+          if (btn.dataset.mode === this.mode) {
+            btn.style.background = 'var(--card-bg)';
+            btn.style.color = 'var(--primary)';
+            btn.style.fontWeight = '600';
+            btn.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+          } else {
+            btn.style.background = 'transparent';
+            btn.style.color = 'var(--text-muted)';
+            btn.style.fontWeight = 'normal';
+            btn.style.boxShadow = 'none';
+          }
+        }
+      }
+      render() {
+        this.innerHTML =
+          '<div style="display:inline-flex; align-items:center; padding:2px; border-radius:10px; background:var(--code-bg); border:1px solid var(--card-border); font-size:0.78rem;">' +
+            '<button type="button" data-mode="auto" title="\u8DDF\u968F\u7CFB\u7EDF" style="display:inline-flex; align-items:center; gap:4px; padding:4px 8px; border-radius:7px; border:none; cursor:pointer; transition:all 0.15s;">' +
+              '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></svg>' +
+              '<span>Auto</span>' +
+            '</button>' +
+            '<button type="button" data-mode="light" title="\u4EAE\u8272\u6A21\u5F0F" style="display:inline-flex; align-items:center; gap:4px; padding:4px 8px; border-radius:7px; border:none; cursor:pointer; transition:all 0.15s;">' +
+              '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2"/></svg>' +
+              '<span>Light</span>' +
+            '</button>' +
+            '<button type="button" data-mode="dark" title="\u6697\u8272\u6A21\u5F0F" style="display:inline-flex; align-items:center; gap:4px; padding:4px 8px; border-radius:7px; border:none; cursor:pointer; transition:all 0.15s;">' +
+              '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 15.5A8 8 0 0 1 8.5 4 8 8 0 0 0 20 15.5Z"/></svg>' +
+              '<span>Dark</span>' +
+            '</button>' +
+          '</div>';
+      }
+      bindEvents() {
+        var self = this;
+        this.addEventListener('click', function(e) {
+          var btn = e.target.closest('[data-mode]');
+          if (btn) {
+            self.applyTheme(btn.dataset.mode);
+          }
+        });
+      }
+    }
+    if (!customElements.get('theme-toggle')) {
+      customElements.define('theme-toggle', ThemeToggle);
+    }
+
+    // ---- Web Component: <status-indicator> -----------------------------------
+    class StatusIndicator extends HTMLElement {
+      static get observedAttributes() { return ['status', 'label', 'ping-ms', 'show-dot']; }
+      connectedCallback() { this.render(); }
+      attributeChangedCallback() { this.render(); }
+      render() {
+        var status = this.getAttribute('status') || 'online';
+        var label = this.getAttribute('label') || '\u5728\u7EBF';
+        var pingMs = this.getAttribute('ping-ms');
+        var showDot = this.getAttribute('show-dot') !== 'false';
+
+        var dotColor = '#10b981', bg = 'rgba(16, 185, 129, 0.12)', text = '#10b981', border = 'rgba(16, 185, 129, 0.25)';
+        if (status === 'connecting' || status === 'busy') {
+          dotColor = '#f59e0b'; bg = 'rgba(245, 158, 11, 0.12)'; text = '#f59e0b'; border = 'rgba(245, 158, 11, 0.25)';
+        } else if (status === 'error' || status === 'offline') {
+          dotColor = '#ef4444'; bg = 'rgba(239, 68, 68, 0.12)'; text = '#ef4444'; border = 'rgba(239, 68, 68, 0.25)';
+        }
+
+        var dotHtml = '';
+        if (showDot) {
+          var pingPulse = status === 'online' ? '<span style="position:absolute; width:100%; height:100%; border-radius:50%; background:' + dotColor + '; opacity:0.6; animation:ping 1.4s cubic-bezier(0, 0, 0.2, 1) infinite;"></span>' : '';
+          dotHtml = '<span style="position:relative; display:inline-flex; width:7px; height:7px;">' +
+            pingPulse +
+            '<span style="position:relative; width:7px; height:7px; border-radius:50%; background:' + dotColor + ';"></span>' +
+          '</span>';
+        }
+
+        var pingText = (pingMs !== null && pingMs !== undefined && pingMs !== '') ? '<span style="opacity:0.8; font-family:monospace; font-size:0.72rem;">(' + pingMs + 'ms)</span>' : '';
+
+        this.innerHTML =
+          '<div style="display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:9999px; background:' + bg + '; border:1px solid ' + border + '; color:' + text + '; font-size:0.76rem; font-weight:600;">' +
+            dotHtml +
+            '<span>' + label + '</span>' +
+            pingText +
+          '</div>';
+      }
+    }
+    if (!customElements.get('status-indicator')) {
+      customElements.define('status-indicator', StatusIndicator);
+    }
+
+    // Ping animation keyframe
+    var styleSheet = document.createElement("style");
+    styleSheet.innerText = "@keyframes ping { 75%, 100% { transform: scale(2.2); opacity: 0; } }";
+    document.head.appendChild(styleSheet);
+
+    // ---- Utilities & State --------------------------------------------------
     function escapeHtml(str) {
       if (str === null || str === undefined) return '';
       return String(str).replace(/[&<>"']/g, function(m) {
@@ -1895,73 +2679,185 @@ kdig -d @${new URL(origin).hostname} +https=${config.path} linux.do A</code></pr
       });
     }
 
-    function setQuery(domain) {
-      document.getElementById('domainInput').value = domain;
-      runQuery();
+    function showToast(msg) {
+      var toast = document.getElementById('toast');
+      var toastMsg = document.getElementById('toastMsg');
+      toastMsg.innerText = msg;
+      toast.classList.add('show');
+      setTimeout(function() { toast.classList.remove('show'); }, 2200);
     }
 
-    async function runQuery() {
-      const domain = document.getElementById('domainInput').value.trim();
-      const type = document.getElementById('typeSelect').value;
-      const box = document.getElementById('resultBox');
-      const btn = document.getElementById('queryBtn');
-      if (!domain) return;
-
-      btn.disabled = true;
-      btn.innerText = '\u67E5\u8BE2\u4E2D...';
-      box.textContent = '\u6B63\u5728\u53D1\u8D77 DoH \u67E5\u8BE2...';
-
-      const start = performance.now();
-      try {
-        const resp = await fetch('${config.jsonPath}?name=' + encodeURIComponent(domain) + '&type=' + encodeURIComponent(type));
-        const data = await resp.json();
-        const duration = Math.round(performance.now() - start);
-
-        let html = '';
-        html += '\u23F1\uFE0F \u89E3\u6790\u8017\u65F6: ' + duration + ' ms\\n';
-        const statusNum = Number(data.Status);
-        html += '\u{1F3AF} \u54CD\u5E94\u72B6\u6001: ' + (statusNum === 0 ? '<span style="color:#10b981">NOERROR (\u6210\u529F)</span>' : '<span style="color:#ef4444">Status ' + statusNum + '</span>') + '\\n';
-        html += '\u{1F512} DNSSEC: ' + (data.AD ? '\u5DF2\u9A8C\u8BC1 (AD=1)' : '\u672A\u5F00\u542F/\u666E\u901A (AD=0)') + '\\n\\n';
-
-        if (Array.isArray(data.Answer) && data.Answer.length > 0) {
-          html += '\u{1F4CB} \u7B54\u6848\u8BB0\u5F55 (Answers):\\n';
-          data.Answer.forEach(ans => {
-            const safeName = escapeHtml(ans.name);
-            const safeType = escapeHtml(ans.type);
-            const safeData = escapeHtml(ans.data);
-            const safeTtl = Number(ans.TTL) || 0;
-            html += '  \u2022 ' + safeName + '  ' + safeType + '  ' + safeData + ' (TTL: ' + safeTtl + 's)\\n';
-          });
-        } else {
-          html += '\u26A0\uFE0F \u672A\u67E5\u8BE2\u5230\u5BF9\u5E94\u8BB0\u5F55\u3002\\n';
-        }
-
-        if (Array.isArray(data.Authority) && data.Authority.length > 0) {
-          html += '\\n\u{1F3DB}\uFE0F \u6743\u5A01\u8BB0\u5F55 (Authority):\\n';
-          data.Authority.forEach(auth => {
-            const safeName = escapeHtml(auth.name);
-            const safeType = escapeHtml(auth.type);
-            const safeData = escapeHtml(auth.data);
-            html += '  \u2022 ' + safeName + '  ' + safeType + '  ' + safeData + '\\n';
-          });
-        }
-
-        box.innerHTML = html;
-        loadStats();
-      } catch (err) {
-        box.innerHTML = '<span style="color:#ef4444">\u67E5\u8BE2\u5931\u8D25: ' + escapeHtml(err.message) + '</span>';
-      } finally {
-        btn.disabled = false;
-        btn.innerText = '\u67E5\u8BE2';
+    function copyText(txt) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(txt).then(function() {
+          showToast('\u5DF2\u590D\u5236\u5230\u526A\u8D34\u677F');
+        }).catch(function() {
+          legacyCopy(txt);
+        });
+      } else {
+        legacyCopy(txt);
       }
     }
 
-    let currentScope = 'local';
+    function legacyCopy(txt) {
+      var input = document.createElement('textarea');
+      input.value = txt;
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand('copy');
+      document.body.removeChild(input);
+      showToast('\u5DF2\u590D\u5236\u5230\u526A\u8D34\u677F');
+    }
+
+    function copyElement(id) {
+      var el = document.getElementById(id);
+      if (el) copyText(el.innerText);
+    }
+
+    // ---- Playground Query ---------------------------------------------------
+    var lastQueryResult = null;
+    var currentResultView = 'formatted';
+
+    function setQuery(domain, type) {
+      document.getElementById('domainInput').value = domain;
+      if (type) document.getElementById('typeSelect').value = type;
+      runQuery();
+    }
+
+    function switchResultView(view) {
+      currentResultView = view;
+      var fmtBtn = document.getElementById('viewFormattedBtn');
+      var rawBtn = document.getElementById('viewRawBtn');
+      if (view === 'formatted') {
+        fmtBtn.classList.add('active');
+        rawBtn.classList.remove('active');
+      } else {
+        rawBtn.classList.add('active');
+        fmtBtn.classList.remove('active');
+      }
+      renderQueryResult();
+    }
+
+    async function runQuery() {
+      var domain = document.getElementById('domainInput').value.trim();
+      var type = document.getElementById('typeSelect').value;
+      var box = document.getElementById('playgroundResult');
+      var btn = document.getElementById('queryBtn');
+      if (!domain) return;
+
+      btn.disabled = true;
+      btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation:spin 1s linear infinite;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg><span>\u67E5\u8BE2\u4E2D...</span>';
+
+      var start = performance.now();
+      try {
+        var resp = await fetch('${config.jsonPath}?name=' + encodeURIComponent(domain) + '&type=' + encodeURIComponent(type));
+        var data = await resp.json();
+        var duration = Math.round(performance.now() - start);
+
+        lastQueryResult = {
+          domain: domain,
+          type: type,
+          data: data,
+          duration: duration,
+          status: resp.status
+        };
+        renderQueryResult();
+        loadStats();
+      } catch (err) {
+        box.innerHTML = '<div style="color:var(--accent-rose); font-size:0.88rem; padding:12px;">' +
+          '<strong>\u67E5\u8BE2\u5931\u8D25\uFF1A</strong> ' + escapeHtml(err.message) +
+          '</div>';
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg><span>\u67E5\u8BE2</span>';
+      }
+    }
+
+    function renderQueryResult() {
+      var box = document.getElementById('playgroundResult');
+      if (!lastQueryResult) return;
+      var q = lastQueryResult;
+      var data = q.data;
+
+      if (currentResultView === 'raw') {
+        box.innerHTML = '<div style="position:relative;">' +
+          '<button class="copy-btn" onclick="copyText(document.getElementById(\\'rawJsonBlock\\').innerText)">\u590D\u5236 JSON</button>' +
+          '<pre id="rawJsonBlock" style="margin:0; font-family:ui-monospace, monospace; font-size:0.82rem; color:var(--text); max-height:360px; overflow-y:auto;">' +
+          escapeHtml(JSON.stringify(data, null, 2)) +
+          '</pre></div>';
+        return;
+      }
+
+      var statusNum = Number(data.Status);
+      var statusBadge = '';
+      if (statusNum === 0) {
+        statusBadge = '<span class="meta-badge success">\u25CF NOERROR (\u6210\u529F)</span>';
+      } else if (statusNum === 3) {
+        statusBadge = '<span class="meta-badge warn">\u25CF NXDOMAIN (\u57DF\u540D\u4E0D\u5B58\u5728)</span>';
+      } else {
+        statusBadge = '<span class="meta-badge error">\u25CF Status ' + statusNum + '</span>';
+      }
+
+      var dnssecBadge = data.AD
+        ? '<span class="meta-badge info"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg> DNSSEC \u5DF2\u9A8C\u8BC1 (AD=1)</span>'
+        : '<span class="meta-badge" style="color:var(--text-faint);">DNSSEC \u672A\u7B7E\u540D (AD=0)</span>';
+
+      var isDomestic = (q.domain.endsWith('linux.do') || q.domain.endsWith('github.com') || q.domain.endsWith('.cn') || q.domain.includes('bilibili') || q.domain.includes('ali') || q.domain.includes('tencent'));
+      var routeGroupBadge = isDomestic
+        ? '<span class="meta-badge info">\u5206\u6D41\uFF1A\u56FD\u5185\u76F4\u8FDE\u7EC4</span>'
+        : '<span class="meta-badge" style="color:var(--accent-purple); background:rgba(139,92,246,0.12); border-color:rgba(139,92,246,0.25);">\u5206\u6D41\uFF1A\u5168\u7403\u515C\u5E95\u7EC4</span>';
+
+      var html = '<div class="meta-badges">' +
+        statusBadge +
+        '<span class="meta-badge">\u94FE\u8DEF\u8017\u65F6: <b style="color:var(--primary); margin-left:3px;">' + q.duration + ' ms</b></span>' +
+        dnssecBadge +
+        routeGroupBadge +
+        '</div>';
+
+      if (Array.isArray(data.Answer) && data.Answer.length > 0) {
+        html += '<div style="font-size:0.82rem; font-weight:600; color:var(--text-muted); margin-bottom:6px;">\u5E94\u7B54\u89E3\u6790\u8BB0\u5F55 (Answers):</div>';
+        html += '<table class="record-table"><thead><tr>' +
+          '<th>Name</th><th>Type</th><th>TTL</th><th>Data (Resolved)</th><th></th>' +
+          '</tr></thead><tbody>';
+        data.Answer.forEach(function(ans, idx) {
+          var safeName = escapeHtml(ans.name);
+          var safeType = escapeHtml(ans.type);
+          var safeData = escapeHtml(ans.data);
+          var safeTtl = Number(ans.TTL) || 0;
+          html += '<tr>' +
+            '<td>' + safeName + '</td>' +
+            '<td><span class="record-type-pill">' + safeType + '</span></td>' +
+            '<td style="color:var(--text-faint);">' + safeTtl + 's</td>' +
+            '<td style="font-weight:600; color:var(--text);">' + safeData + '</td>' +
+            '<td style="text-align:right;"><button class="btn btn-secondary" style="padding:2px 8px; font-size:0.75rem;" onclick="copyText(\\'' + safeData.replace(/'/g, "\\\\'") + '\\')">\u590D\u5236\u503C</button></td>' +
+            '</tr>';
+        });
+        html += '</tbody></table>';
+      } else {
+        html += '<div style="color:var(--text-muted); font-size:0.85rem; padding:8px 0;">\u672A\u67E5\u8BE2\u5230\u5BF9\u5E94\u5E94\u7B54\u8BB0\u5F55 (ANCOUNT=0)\u3002</div>';
+      }
+
+      if (Array.isArray(data.Authority) && data.Authority.length > 0) {
+        html += '<details style="margin-top:12px; font-size:0.82rem; color:var(--text-muted);">' +
+          '<summary style="cursor:pointer; font-weight:600; padding:4px 0;">\u{1F3DB}\uFE0F \u67E5\u770B\u6743\u5A01\u8BB0\u5F55 (Authority: ' + data.Authority.length + ' \u6761)</summary>' +
+          '<div style="margin-top:6px; background:rgba(0,0,0,0.15); padding:8px; border-radius:6px; font-family:ui-monospace, monospace;">';
+        data.Authority.forEach(function(auth) {
+          html += '<div>' + escapeHtml(auth.name) + ' ' + escapeHtml(auth.type) + ' ' + escapeHtml(auth.data) + '</div>';
+        });
+        html += '</div></details>';
+      }
+
+      box.innerHTML = html;
+    }
+
+    // ---- Racing Telemetry & Stats -------------------------------------------
+    var currentScope = 'local';
+    var autoRefreshTimer = null;
 
     function setStatsScope(scope) {
       currentScope = scope;
-      const localBtn = document.getElementById('scopeLocalBtn');
-      const globalBtn = document.getElementById('scopeGlobalBtn');
+      var localBtn = document.getElementById('scopeLocalBtn');
+      var globalBtn = document.getElementById('scopeGlobalBtn');
       if (scope === 'global') {
         localBtn.classList.remove('active');
         globalBtn.classList.add('active');
@@ -1972,29 +2868,40 @@ kdig -d @${new URL(origin).hostname} +https=${config.path} linux.do A</code></pr
       loadStats(scope);
     }
 
-    async function loadStats(scope = currentScope) {
-      try {
-        const url = scope === 'global' ? '/api/stats?scope=global' : '/api/stats';
-        const resp = await fetch(url);
-        if (!resp.ok) return;
-        const rawData = await resp.json();
-        const isGlobal = scope === 'global';
-        const noticeEl = document.getElementById('scopeNotice');
+    function toggleAutoRefresh(enable) {
+      if (autoRefreshTimer) clearInterval(autoRefreshTimer);
+      if (enable) {
+        autoRefreshTimer = setInterval(function() {
+          loadStats(currentScope);
+        }, 10000);
+      }
+    }
 
-        let data = rawData;
+    async function loadStats(scope = currentScope) {
+      var icon = document.getElementById('refreshIcon');
+      if (icon) icon.style.animation = 'spin 1s linear infinite';
+      try {
+        var url = scope === 'global' ? '/api/stats?scope=global' : '/api/stats';
+        var resp = await fetch(url);
+        if (!resp.ok) return;
+        var rawData = await resp.json();
+        var isGlobal = scope === 'global';
+        var noticeEl = document.getElementById('scopeNotice');
+
+        var data = rawData;
         if (isGlobal) {
           if (rawData.available) {
             noticeEl.innerHTML = '\u{1F310} <b>\u5168\u7403\u591A\u5730\u57DF\u805A\u5408\u6570\u636E (Cloudflare Analytics Engine)</b> \u2022 \u6700\u8FD1 24 \u5C0F\u65F6\u8DE8\u6240\u6709 PoP \u8FB9\u7F18\u8282\u70B9\u603B\u8BA1';
-            noticeEl.style.borderLeftColor = '#10b981';
+            noticeEl.style.borderLeftColor = 'var(--accent-emerald)';
             document.getElementById('analyticsStatus').innerText = '\u5168\u5C40 SQL \u67E5\u8BE2\u5DF2\u6FC0\u6D3B';
-            document.getElementById('analyticsStatus').style.color = '#10b981';
+            document.getElementById('analyticsStatus').style.color = 'var(--accent-emerald)';
             document.getElementById('uptimeWrap').style.display = 'none';
           } else {
             noticeEl.innerHTML = '\u26A0\uFE0F <b>\u5168\u7403\u805A\u5408\u672A\u5F00\u542F\u6216\u672A\u914D\u7F6E\u8BFB\u53D6\u51ED\u636E</b>\uFF1A' + escapeHtml(rawData.message || '\u56DE\u9000\u5C55\u793A\u5F53\u524D\u672C\u5730 PoP \u6570\u636E') + '\u3002\u53EF\u81F3 Cloudflare \u63A7\u5236\u53F0\u6FC0\u6D3B Analytics Engine\u3002';
-            noticeEl.style.borderLeftColor = '#f59e0b';
+            noticeEl.style.borderLeftColor = 'var(--accent-amber)';
             document.getElementById('analyticsStatus').innerText = '\u672A\u6FC0\u6D3B\u5168\u5C40\u8BFB\u53D6 (\u5C55\u793A\u672C\u5730)';
-            document.getElementById('analyticsStatus').style.color = '#f59e0b';
-            document.getElementById('uptimeWrap').style.display = 'inline';
+            document.getElementById('analyticsStatus').style.color = 'var(--accent-amber)';
+            document.getElementById('uptimeWrap').style.display = 'inline-flex';
             if (rawData.fallback) data = rawData.fallback;
           }
         } else {
@@ -2002,18 +2909,18 @@ kdig -d @${new URL(origin).hostname} +https=${config.path} linux.do A</code></pr
           noticeEl.style.borderLeftColor = 'var(--primary)';
           document.getElementById('analyticsStatus').innerText = '\u5DF2\u63A5\u5165 (Worker \u70B9\u4F4D\u5199\u5165)';
           document.getElementById('analyticsStatus').style.color = 'var(--primary)';
-          document.getElementById('uptimeWrap').style.display = 'inline';
+          document.getElementById('uptimeWrap').style.display = 'inline-flex';
         }
 
         // Domestic
-        const dom = (data.upstreams && data.upstreams.domestic) ? data.upstreams.domestic : { upstreams: {}, totalWins: 0 };
-        const ali = dom.upstreams['dns.alidns.com'] || { wins: 0, winRate: '0.0%' };
-        const pod = dom.upstreams['doh.pub'] || { wins: 0, winRate: '0.0%' };
+        var dom = (data.upstreams && data.upstreams.domestic) ? data.upstreams.domestic : { upstreams: {}, totalWins: 0 };
+        var ali = dom.upstreams['dns.alidns.com'] || { wins: 0, winRate: '0.0%' };
+        var pod = dom.upstreams['doh.pub'] || { wins: 0, winRate: '0.0%' };
         document.getElementById('domesticTotalWins').innerText = dom.totalWins + ' \u6B21\u80DC\u51FA';
         document.getElementById('winAlidns').innerText = ali.wins + ' (' + ali.winRate + ')';
         document.getElementById('winDohpub').innerText = pod.wins + ' (' + pod.winRate + ')';
-        const domTotal = ali.wins + pod.wins;
-        const aliPct = domTotal > 0 ? (ali.wins / domTotal) * 100 : 50;
+        var domTotal = ali.wins + pod.wins;
+        var aliPct = domTotal > 0 ? (ali.wins / domTotal) * 100 : 50;
         document.getElementById('barAlidns').style.width = aliPct + '%';
         document.getElementById('barDohpub').style.width = (100 - aliPct) + '%';
 
@@ -2024,14 +2931,14 @@ kdig -d @${new URL(origin).hostname} +https=${config.path} linux.do A</code></pr
         }
 
         // Global
-        const glob = (data.upstreams && data.upstreams.global) ? data.upstreams.global : { upstreams: {}, totalWins: 0 };
-        const ggl = glob.upstreams['dns.google'] || { wins: 0, winRate: '0.0%' };
-        const cf = glob.upstreams['cloudflare-dns.com'] || { wins: 0, winRate: '0.0%' };
+        var glob = (data.upstreams && data.upstreams.global) ? data.upstreams.global : { upstreams: {}, totalWins: 0 };
+        var ggl = glob.upstreams['dns.google'] || { wins: 0, winRate: '0.0%' };
+        var cf = glob.upstreams['cloudflare-dns.com'] || { wins: 0, winRate: '0.0%' };
         document.getElementById('globalTotalWins').innerText = glob.totalWins + ' \u6B21\u80DC\u51FA';
         document.getElementById('winGoogle').innerText = ggl.wins + ' (' + ggl.winRate + ')';
         document.getElementById('winCf').innerText = cf.wins + ' (' + cf.winRate + ')';
-        const globTotal = ggl.wins + cf.wins;
-        const gglPct = globTotal > 0 ? (ggl.wins / globTotal) * 100 : 50;
+        var globTotal = ggl.wins + cf.wins;
+        var gglPct = globTotal > 0 ? (ggl.wins / globTotal) * 100 : 50;
         document.getElementById('barGoogle').style.width = gglPct + '%';
         document.getElementById('barCf').style.width = (100 - gglPct) + '%';
 
@@ -2048,40 +2955,67 @@ kdig -d @${new URL(origin).hostname} +https=${config.path} linux.do A</code></pr
           document.getElementById('totalRequests').innerText = data.totalRequests;
         }
         if (typeof data.uptimeSec !== 'undefined') {
-          document.getElementById('nodeUptime').innerText = data.uptimeSec + 's';
+          document.getElementById('nodeUptime').innerText = formatUptime(data.uptimeSec);
         }
       } catch (err) {
         console.warn('Failed to load stats:', err);
+      } finally {
+        if (icon) setTimeout(function() { icon.style.animation = ''; }, 300);
       }
     }
 
-    window.addEventListener('DOMContentLoaded', () => {
-      loadStats();
-    });
+    function formatUptime(sec) {
+      if (!sec || sec < 0) return '0s';
+      if (sec < 60) return sec + 's';
+      if (sec < 3600) return Math.floor(sec / 60) + 'm ' + (sec % 60) + 's';
+      var h = Math.floor(sec / 3600);
+      var m = Math.floor((sec % 3600) / 60);
+      return h + 'h ' + m + 'm';
+    }
 
-    function switchTab(name) {
-      const contents = document.querySelectorAll('.tab-content');
-      contents.forEach(c => c.style.display = 'none');
-      const btns = document.querySelectorAll('.tab-btn');
-      btns.forEach(b => b.classList.remove('active'));
+    // Gateway Live Probe (/healthz)
+    async function probeGateway() {
+      var indicator = document.getElementById('globalGatewayStatus');
+      var start = performance.now();
+      try {
+        var resp = await fetch('/healthz');
+        var duration = Math.round(performance.now() - start);
+        if (resp.ok) {
+          var data = await resp.json();
+          indicator.setAttribute('status', 'online');
+          indicator.setAttribute('label', '\u8FB9\u7F18\u5728\u7EBF (' + (data.version || 'v1.2.0') + ')');
+          indicator.setAttribute('ping-ms', duration);
+        } else {
+          indicator.setAttribute('status', 'error');
+          indicator.setAttribute('label', '\u72B6\u6001\u5F02\u5E38');
+        }
+      } catch (e) {
+        indicator.setAttribute('status', 'offline');
+        indicator.setAttribute('label', '\u63A2\u6D4B\u79BB\u7EBF');
+      }
+    }
 
-      const target = document.getElementById('tab-' + name);
+    // Client Config Tabs
+    function switchClientTab(name) {
+      var contents = document.querySelectorAll('.client-tab-content');
+      for (var i = 0; i < contents.length; i++) contents[i].style.display = 'none';
+      var btns = document.querySelectorAll('.tabs-header .tab-btn');
+      for (var j = 0; j < btns.length; j++) btns[j].classList.remove('active');
+
+      var target = document.getElementById('tab-' + name);
       if (target) target.style.display = 'block';
-      event.target.classList.add('active');
-    }
-
-    function copyText(txt) {
-      navigator.clipboard.writeText(txt).then(() => {
-        alert('\u5DF2\u590D\u5236\u5230\u526A\u8D34\u677F: ' + txt);
-      });
-    }
-
-    function copyElement(id) {
-      const el = document.getElementById(id);
-      if (el) {
-        copyText(el.innerText);
+      if (event && event.currentTarget) {
+        event.currentTarget.classList.add('active');
       }
     }
+
+    // Init
+    window.addEventListener('DOMContentLoaded', function() {
+      loadStats();
+      probeGateway();
+      toggleAutoRefresh(true);
+      setInterval(probeGateway, 30000);
+    });
   <\/script>
 </body>
 </html>`;
