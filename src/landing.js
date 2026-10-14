@@ -39,55 +39,55 @@ export function renderLandingHtml(origin, config) {
   </script>
   <style>
     :root {
-      --bg: #090d16;
-      --bg-subtle: #0f172a;
-      --card-bg: rgba(18, 26, 43, 0.75);
-      --card-border: rgba(255, 255, 255, 0.08);
-      --card-hover-border: rgba(59, 130, 246, 0.3);
-      --text: #f8fafc;
-      --text-muted: #94a3b8;
-      --text-faint: #64748b;
-      --primary: #3b82f6;
-      --primary-hover: #2563eb;
-      --primary-glow: rgba(59, 130, 246, 0.15);
+      --bg: #101418;
+      --bg-subtle: #171d22;
+      --card-bg: #171d22;
+      --card-border: #2a333a;
+      --card-hover-border: #48616a;
+      --text: #e8edf0;
+      --text-muted: #a0adb4;
+      --text-faint: #78878f;
+      --primary: #70c7bd;
+      --primary-hover: #8bd8ce;
+      --primary-glow: rgba(112, 199, 189, 0.12);
       --accent-emerald: #10b981;
       --accent-amber: #f59e0b;
       --accent-rose: #ef4444;
       --accent-purple: #8b5cf6;
       --accent-orange: #f97316;
-      --code-bg: #050811;
-      --chip-bg: rgba(255, 255, 255, 0.04);
-      --chip-border: rgba(255, 255, 255, 0.08);
-      --nav-bg: rgba(9, 13, 22, 0.82);
+      --code-bg: #11171b;
+      --chip-bg: #1b2328;
+      --chip-border: #303b42;
+      --nav-bg: rgba(16, 20, 24, 0.94);
     }
     html:not(.dark) {
-      --bg: #f8fafc;
-      --bg-subtle: #f1f5f9;
-      --card-bg: rgba(255, 255, 255, 0.9);
-      --card-border: rgba(0, 0, 0, 0.08);
-      --card-hover-border: rgba(37, 99, 235, 0.3);
-      --text: #0f172a;
-      --text-muted: #64748b;
-      --text-faint: #94a3b8;
-      --primary: #2563eb;
-      --primary-hover: #1d4ed8;
-      --primary-glow: rgba(37, 99, 235, 0.1);
+      --bg: #f3f6f6;
+      --bg-subtle: #e9eeee;
+      --card-bg: #ffffff;
+      --card-border: #dce4e5;
+      --card-hover-border: #9abbb7;
+      --text: #192326;
+      --text-muted: #58686d;
+      --text-faint: #829094;
+      --primary: #187d73;
+      --primary-hover: #12675f;
+      --primary-glow: rgba(24, 125, 115, 0.1);
       --accent-emerald: #059669;
       --accent-amber: #d97706;
       --accent-rose: #dc2626;
       --accent-purple: #7c3aed;
       --accent-orange: #ea580c;
-      --code-bg: #f1f5f9;
-      --chip-bg: rgba(0, 0, 0, 0.03);
-      --chip-border: rgba(0, 0, 0, 0.08);
-      --nav-bg: rgba(248, 250, 252, 0.85);
+      --code-bg: #f5f8f8;
+      --chip-bg: #f6f8f8;
+      --chip-border: #dce4e5;
+      --nav-bg: rgba(243, 246, 246, 0.94);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", "Helvetica Neue", Arial, sans-serif;
       background-color: var(--bg);
       color: var(--text);
-      line-height: 1.6;
+      line-height: 1.55;
       overflow-x: hidden;
       min-height: 100vh;
       display: flex;
@@ -106,10 +106,10 @@ export function renderLandingHtml(origin, config) {
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border-bottom: 1px solid var(--card-border);
-      padding: 12px 24px;
+      padding: 10px 28px;
     }
     .nav-inner {
-      max-width: 1140px;
+      max-width: 1220px;
       margin: 0 auto;
       display: flex;
       align-items: center;
@@ -119,28 +119,27 @@ export function renderLandingHtml(origin, config) {
     .nav-brand {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 9px;
       font-weight: 700;
-      font-size: 1.15rem;
-      letter-spacing: -0.02em;
+      font-size: 1rem;
+      letter-spacing: -0.01em;
       color: var(--text);
     }
     .brand-icon {
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
-      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      width: 30px;
+      height: 30px;
+      border-radius: 7px;
+      background: linear-gradient(135deg, var(--primary) 0%, #187d73 100%);
       display: flex;
       align-items: center;
       justify-content: center;
       color: #fff;
-      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
     }
     .version-tag {
-      font-size: 0.72rem;
+      font-size: 0.68rem;
       font-weight: 600;
       padding: 2px 7px;
-      border-radius: 9999px;
+      border-radius: 5px;
       background: var(--primary-glow);
       color: var(--primary);
       border: 1px solid var(--card-border);
@@ -148,64 +147,57 @@ export function renderLandingHtml(origin, config) {
     .nav-actions {
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 10px;
     }
     
     /* Layout Container */
     .container {
-      max-width: 1140px;
+      max-width: 1220px;
       margin: 0 auto;
-      padding: 40px 20px 80px 20px;
+      padding: 34px 24px 64px;
       width: 100%;
       flex: 1;
     }
     
     /* Hero Header */
     .hero {
-      text-align: center;
-      margin-bottom: 44px;
-      padding: 10px 0 20px 0;
+      text-align: left;
+      margin: 0 0 28px;
+      padding: 8px 0 24px;
+      border-bottom: 1px solid var(--card-border);
     }
     .hero-badge {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 5px 14px;
-      border-radius: 9999px;
-      font-size: 0.85rem;
+      padding: 4px 9px;
+      border-radius: 5px;
+      font-size: 0.76rem;
       font-weight: 500;
       background: var(--primary-glow);
       color: var(--primary);
       border: 1px solid var(--card-border);
-      margin-bottom: 18px;
+      margin-bottom: 12px;
     }
     .hero h1 {
-      font-size: 2.75rem;
-      font-weight: 800;
-      letter-spacing: -0.03em;
-      margin-bottom: 14px;
-      background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 50%, #93c5fd 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    html:not(.dark) .hero h1 {
-      background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 50%, #3b82f6 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: 0;
+      margin-bottom: 8px;
+      color: var(--text);
     }
     .hero-desc {
-      font-size: 1.15rem;
+      font-size: 0.96rem;
       color: var(--text-muted);
-      max-width: 760px;
-      margin: 0 auto 24px auto;
+      max-width: 780px;
+      margin: 0;
     }
     .feature-tags {
       display: flex;
       flex-wrap: wrap;
-      justify-content: center;
-      gap: 8px;
-      max-width: 860px;
-      margin: 0 auto;
+      justify-content: flex-start;
+      gap: 7px;
+      margin-top: 17px;
     }
     .feature-tag {
       display: inline-flex;
@@ -213,9 +205,9 @@ export function renderLandingHtml(origin, config) {
       gap: 6px;
       background: var(--chip-bg);
       border: 1px solid var(--chip-border);
-      padding: 5px 12px;
-      border-radius: 8px;
-      font-size: 0.82rem;
+      padding: 4px 9px;
+      border-radius: 5px;
+      font-size: 0.76rem;
       font-weight: 500;
       color: var(--text-muted);
     }
@@ -227,11 +219,11 @@ export function renderLandingHtml(origin, config) {
     .grid {
       display: grid;
       grid-template-columns: 1fr;
-      gap: 24px;
-      margin-bottom: 32px;
+      gap: 16px;
+      margin-bottom: 22px;
     }
     @media (min-width: 840px) {
-      .grid-2 { grid-template-columns: 1fr 1fr; }
+      .grid-2 { grid-template-columns: minmax(0, 1.15fr) minmax(360px, 0.85fr); }
     }
     @media (min-width: 1024px) {
       .grid-3 { grid-template-columns: repeat(3, 1fr); }
@@ -241,13 +233,11 @@ export function renderLandingHtml(origin, config) {
     /* Modern Card */
     .card {
       background: var(--card-bg);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
       border: 1px solid var(--card-border);
-      border-radius: 16px;
-      padding: 24px;
-      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.2);
-      transition: border-color 0.2s, box-shadow 0.2s;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+      transition: border-color 0.2s;
     }
     .card:hover {
       border-color: var(--card-hover-border);
@@ -257,23 +247,29 @@ export function renderLandingHtml(origin, config) {
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      margin-bottom: 18px;
-      padding-bottom: 12px;
+      margin-bottom: 14px;
+      padding-bottom: 10px;
       border-bottom: 1px solid var(--card-border);
     }
     .card-title {
       display: flex;
       align-items: center;
-      gap: 10px;
-      font-size: 1.15rem;
+      gap: 8px;
+      font-size: 1rem;
       font-weight: 600;
-      letter-spacing: -0.01em;
+      letter-spacing: 0;
     }
     .card-title-icon {
+      width: 20px;
+      height: 20px;
       display: flex;
       align-items: center;
       justify-content: center;
       color: var(--primary);
+    }
+    .card-title-icon svg {
+      width: 18px;
+      height: 18px;
     }
     
     /* Inputs & Form Elements */
@@ -289,8 +285,9 @@ export function renderLandingHtml(origin, config) {
     input[type="text"] {
       flex: 1;
       min-width: 180px;
-      padding: 10px 14px;
-      border-radius: 10px;
+      min-height: 40px;
+      padding: 8px 12px;
+      border-radius: 6px;
       border: 1px solid var(--card-border);
       background: var(--code-bg);
       color: var(--text);
@@ -300,11 +297,12 @@ export function renderLandingHtml(origin, config) {
     }
     input[type="text"]:focus {
       border-color: var(--primary);
-      box-shadow: 0 0 0 3px var(--primary-glow);
+      box-shadow: 0 0 0 2px var(--primary-glow);
     }
     select {
-      padding: 10px 14px;
-      border-radius: 10px;
+      min-height: 40px;
+      padding: 8px 12px;
+      border-radius: 6px;
       border: 1px solid var(--card-border);
       background: var(--code-bg);
       color: var(--text);
@@ -321,37 +319,40 @@ export function renderLandingHtml(origin, config) {
       align-items: center;
       justify-content: center;
       gap: 6px;
-      padding: 10px 18px;
+      min-height: 40px;
+      padding: 8px 16px;
       background: var(--primary);
-      color: #fff;
+      color: #101418;
       border: none;
-      border-radius: 10px;
+      border-radius: 6px;
       font-weight: 600;
-      font-size: 0.92rem;
+      font-size: 0.9rem;
       cursor: pointer;
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+      transition: background-color 0.15s;
       white-space: nowrap;
+    }
+    html.dark button.btn {
+      color: #101418;
+    }
+    html:not(.dark) button.btn {
+      color: #ffffff;
     }
     button.btn:hover {
       background: var(--primary-hover);
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
-    }
-    button.btn:active {
-      transform: translateY(0);
     }
     button.btn-secondary {
       background: var(--chip-bg);
       color: var(--text);
       border: 1px solid var(--card-border);
-      box-shadow: none;
     }
     button.btn-secondary:hover {
       background: var(--primary-glow);
       color: var(--primary);
       border-color: var(--primary);
-      box-shadow: none;
+    }
+    button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
     }
     
     /* Quick Domain Chips */
@@ -374,7 +375,7 @@ export function renderLandingHtml(origin, config) {
       background: var(--chip-bg);
       border: 1px solid var(--chip-border);
       padding: 4px 10px;
-      border-radius: 8px;
+      border-radius: 5px;
       font-size: 0.8rem;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
       color: var(--text-muted);
@@ -392,8 +393,8 @@ export function renderLandingHtml(origin, config) {
     .code-block {
       position: relative;
       background: var(--code-bg);
-      border-radius: 12px;
-      padding: 14px 16px;
+      border-radius: 6px;
+      padding: 12px 14px;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
       font-size: 0.85rem;
       border: 1px solid var(--card-border);
@@ -414,7 +415,7 @@ export function renderLandingHtml(origin, config) {
       background: rgba(255, 255, 255, 0.08);
       border: 1px solid rgba(255, 255, 255, 0.12);
       color: var(--text-muted);
-      border-radius: 6px;
+      border-radius: 5px;
       padding: 4px 9px;
       font-size: 0.75rem;
       font-weight: 500;
@@ -428,17 +429,20 @@ export function renderLandingHtml(origin, config) {
     }
     .copy-btn:hover {
       background: var(--primary);
-      color: #fff;
+      color: #101418;
       border-color: var(--primary);
+    }
+    html:not(.dark) .copy-btn:hover {
+      color: #ffffff;
     }
     
     /* Result Playground Box */
     .playground-result {
       background: var(--code-bg);
-      border-radius: 12px;
+      border-radius: 6px;
       padding: 16px;
       border: 1px solid var(--card-border);
-      min-height: 140px;
+      min-height: 120px;
     }
     .meta-badges {
       display: flex;
@@ -453,7 +457,7 @@ export function renderLandingHtml(origin, config) {
       align-items: center;
       gap: 6px;
       padding: 3px 9px;
-      border-radius: 6px;
+      border-radius: 5px;
       font-size: 0.78rem;
       font-weight: 600;
       background: rgba(255, 255, 255, 0.05);
@@ -477,7 +481,7 @@ export function renderLandingHtml(origin, config) {
     .meta-badge.info {
       background: var(--primary-glow);
       color: var(--primary);
-      border-color: rgba(59, 130, 246, 0.25);
+      border-color: rgba(112, 199, 189, 0.25);
     }
     
     /* Record Table */
@@ -487,10 +491,11 @@ export function renderLandingHtml(origin, config) {
       font-size: 0.85rem;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
       margin-top: 8px;
+      table-layout: fixed;
     }
     .record-table th {
       text-align: left;
-      padding: 8px 10px;
+      padding: 8px;
       color: var(--text-faint);
       font-weight: 600;
       border-bottom: 1px solid var(--card-border);
@@ -499,7 +504,7 @@ export function renderLandingHtml(origin, config) {
       letter-spacing: 0.04em;
     }
     .record-table td {
-      padding: 8px 10px;
+      padding: 8px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.04);
       word-break: break-all;
     }
@@ -515,7 +520,7 @@ export function renderLandingHtml(origin, config) {
       border-radius: 4px;
       font-size: 0.75rem;
       font-weight: 700;
-      background: rgba(59, 130, 246, 0.15);
+      background: var(--primary-glow);
       color: var(--primary);
     }
     
@@ -524,7 +529,7 @@ export function renderLandingHtml(origin, config) {
       display: inline-flex;
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid var(--card-border);
-      border-radius: 8px;
+      border-radius: 6px;
       padding: 2px;
       gap: 2px;
       margin-left: auto;
@@ -533,9 +538,10 @@ export function renderLandingHtml(origin, config) {
       background: rgba(0, 0, 0, 0.04);
     }
     .view-btn {
+      min-height: 30px;
       padding: 4px 10px;
       font-size: 0.75rem;
-      border-radius: 6px;
+      border-radius: 4px;
       border: none;
       background: transparent;
       color: var(--text-muted);
@@ -545,8 +551,11 @@ export function renderLandingHtml(origin, config) {
     }
     .view-btn.active {
       background: var(--primary);
-      color: #fff;
+      color: #101418;
       font-weight: 600;
+    }
+    html:not(.dark) .view-btn.active {
+      color: #ffffff;
     }
     
     /* Racing Telemetry Cards */
@@ -560,7 +569,7 @@ export function renderLandingHtml(origin, config) {
     }
     .progress-bar-container {
       display: flex;
-      height: 10px;
+      height: 8px;
       border-radius: 9999px;
       overflow: hidden;
       background: rgba(255, 255, 255, 0.08);
@@ -594,7 +603,7 @@ export function renderLandingHtml(origin, config) {
     /* Tabs for Client Configuration */
     .tabs-header {
       display: flex;
-      gap: 6px;
+      gap: 3px;
       border-bottom: 1px solid var(--card-border);
       margin-bottom: 16px;
       overflow-x: auto;
@@ -602,8 +611,8 @@ export function renderLandingHtml(origin, config) {
       scrollbar-width: thin;
     }
     .tab-btn {
-      padding: 7px 14px;
-      border-radius: 8px;
+      padding: 6px 10px;
+      border-radius: 5px;
       font-size: 0.86rem;
       background: transparent;
       border: 1px solid transparent;
@@ -623,7 +632,8 @@ export function renderLandingHtml(origin, config) {
     .tab-btn.active {
       background: var(--primary-glow);
       color: var(--primary);
-      border-color: var(--card-border);
+      border-color: transparent;
+      box-shadow: inset 0 -2px var(--primary);
       font-weight: 600;
     }
     
@@ -631,21 +641,20 @@ export function renderLandingHtml(origin, config) {
     .feature-card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
-      border-radius: 12px;
-      padding: 20px;
+      border-radius: 7px;
+      padding: 16px;
       display: flex;
-      gap: 16px;
+      gap: 12px;
       align-items: flex-start;
-      transition: border-color 0.2s, transform 0.2s;
+      transition: border-color 0.2s;
     }
     .feature-card:hover {
       border-color: var(--card-hover-border);
-      transform: translateY(-2px);
     }
     .feature-icon-wrapper {
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
+      width: 34px;
+      height: 34px;
+      border-radius: 7px;
       background: var(--primary-glow);
       color: var(--primary);
       display: flex;
@@ -659,9 +668,9 @@ export function renderLandingHtml(origin, config) {
       text-align: center;
       color: var(--text-muted);
       font-size: 0.88rem;
-      padding: 32px 20px;
+      padding: 24px 20px;
       border-top: 1px solid var(--card-border);
-      background: var(--bg);
+      background: transparent;
     }
     .footer-links {
       display: flex;
@@ -677,11 +686,11 @@ export function renderLandingHtml(origin, config) {
       bottom: 24px;
       right: 24px;
       background: var(--primary);
-      color: #fff;
+      color: #101418;
       padding: 10px 18px;
-      border-radius: 10px;
+      border-radius: 6px;
       font-size: 0.88rem;
-      font-weight: 500;
+      font-weight: 600;
       box-shadow: 0 10px 25px rgba(0,0,0,0.3);
       display: flex;
       align-items: center;
@@ -692,9 +701,53 @@ export function renderLandingHtml(origin, config) {
       transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       pointer-events: none;
     }
+    html:not(.dark) .toast {
+      color: #ffffff;
+    }
     .toast.show {
       opacity: 1;
       transform: translateY(0);
+    }
+
+    /* Status indicator label targeting */
+    .status-indicator-label {
+      display: inline-block;
+    }
+
+    /* Mobile Responsive Breakpoints */
+    @media (max-width: 700px) {
+      .nav-bar { padding: 9px 14px; }
+      .nav-actions { gap: 6px; }
+      #globalGatewayStatus > div { max-width: 118px; padding: 3px 7px !important; }
+      #globalGatewayStatus .status-indicator-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      theme-toggle button span { display: none; }
+      theme-toggle button { padding: 5px 7px !important; }
+      .container { padding: 24px 14px 42px; }
+      .hero { padding-bottom: 18px; margin-bottom: 18px; }
+      .hero h1 { font-size: 1.65rem; }
+      .hero-desc { font-size: 0.9rem; }
+      .feature-tags { gap: 6px; }
+      .feature-tag { font-size: 0.71rem; }
+      .card { padding: 15px; }
+      .card-header { align-items: flex-start; flex-wrap: wrap; }
+      .card-header > .view-switcher { margin-left: 0; }
+      .card-header > div:last-child { max-width: 100%; }
+      .input-group { flex-wrap: wrap; }
+      .input-group input[type="text"] { flex-basis: 100%; }
+      .input-group select { flex: 1; }
+      .view-switcher { margin-left: 0; }
+      .record-table { font-size: 0.76rem; }
+      .record-table th, .record-table td { padding: 6px 4px; }
+      .record-table th:nth-child(1), .record-table td:nth-child(1) { display: none; }
+      .record-table th:nth-child(5), .record-table td:nth-child(5) { width: 56px; }
+      .record-table .btn { white-space: normal; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
     }
   </style>
 </head>
@@ -1315,15 +1368,15 @@ doggo linux.do @${origin}${config.path} --doh</code></pre>
       render() {
         this.innerHTML =
           '<div style="display:inline-flex; align-items:center; padding:2px; border-radius:10px; background:var(--code-bg); border:1px solid var(--card-border); font-size:0.78rem;">' +
-            '<button type="button" data-mode="auto" title="跟随系统" style="display:inline-flex; align-items:center; gap:4px; padding:4px 8px; border-radius:7px; border:none; cursor:pointer; transition:all 0.15s;">' +
+            '<button type="button" data-mode="auto" title="跟随系统" aria-label="跟随系统" style="display:inline-flex; align-items:center; gap:4px; padding:4px 8px; border-radius:7px; border:none; cursor:pointer; transition:all 0.15s;">' +
               '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></svg>' +
               '<span>Auto</span>' +
             '</button>' +
-            '<button type="button" data-mode="light" title="亮色模式" style="display:inline-flex; align-items:center; gap:4px; padding:4px 8px; border-radius:7px; border:none; cursor:pointer; transition:all 0.15s;">' +
+            '<button type="button" data-mode="light" title="亮色模式" aria-label="亮色模式" style="display:inline-flex; align-items:center; gap:4px; padding:4px 8px; border-radius:7px; border:none; cursor:pointer; transition:all 0.15s;">' +
               '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2"/></svg>' +
               '<span>Light</span>' +
             '</button>' +
-            '<button type="button" data-mode="dark" title="暗色模式" style="display:inline-flex; align-items:center; gap:4px; padding:4px 8px; border-radius:7px; border:none; cursor:pointer; transition:all 0.15s;">' +
+            '<button type="button" data-mode="dark" title="暗色模式" aria-label="暗色模式" style="display:inline-flex; align-items:center; gap:4px; padding:4px 8px; border-radius:7px; border:none; cursor:pointer; transition:all 0.15s;">' +
               '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 15.5A8 8 0 0 1 8.5 4 8 8 0 0 0 20 15.5Z"/></svg>' +
               '<span>Dark</span>' +
             '</button>' +
@@ -1375,7 +1428,7 @@ doggo linux.do @${origin}${config.path} --doh</code></pre>
         this.innerHTML =
           '<div style="display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:9999px; background:' + bg + '; border:1px solid ' + border + '; color:' + text + '; font-size:0.76rem; font-weight:600;">' +
             dotHtml +
-            '<span>' + label + '</span>' +
+            '<span class="status-indicator-label">' + label + '</span>' +
             pingText +
           '</div>';
       }
@@ -1564,7 +1617,7 @@ doggo linux.do @${origin}${config.path} --doh</code></pre>
 
       if (Array.isArray(data.Authority) && data.Authority.length > 0) {
         html += '<details style="margin-top:12px; font-size:0.82rem; color:var(--text-muted);">' +
-          '<summary style="cursor:pointer; font-weight:600; padding:4px 0;">🏛️ 查看权威记录 (Authority: ' + data.Authority.length + ' 条)</summary>' +
+          '<summary style="cursor:pointer; font-weight:600; padding:4px 0;">查看权威记录 (Authority: ' + data.Authority.length + ' 条)</summary>' +
           '<div style="margin-top:6px; background:rgba(0,0,0,0.15); padding:8px; border-radius:6px; font-family:ui-monospace, monospace;">';
         data.Authority.forEach(function(auth) {
           html += '<div>' + escapeHtml(auth.name) + ' ' + escapeHtml(auth.type) + ' ' + escapeHtml(auth.data) + '</div>';
@@ -1616,13 +1669,13 @@ doggo linux.do @${origin}${config.path} --doh</code></pre>
         var data = rawData;
         if (isGlobal) {
           if (rawData.available) {
-            noticeEl.innerHTML = '🌐 <b>全球多地域聚合数据 (Cloudflare Analytics Engine)</b> • 最近 24 小时跨所有 PoP 边缘节点总计';
+            noticeEl.innerHTML = '<b>全球多地域聚合数据 (Cloudflare Analytics Engine)</b> · 最近 24 小时跨所有 PoP 边缘节点总计';
             noticeEl.style.borderLeftColor = 'var(--accent-emerald)';
             document.getElementById('analyticsStatus').innerText = '全局 SQL 查询已激活';
             document.getElementById('analyticsStatus').style.color = 'var(--accent-emerald)';
             document.getElementById('uptimeWrap').style.display = 'none';
           } else {
-            noticeEl.innerHTML = '⚠️ <b>全球聚合未开启或未配置读取凭据</b>：' + escapeHtml(rawData.message || '回退展示当前本地 PoP 数据') + '。可至 Cloudflare 控制台激活 Analytics Engine。';
+            noticeEl.innerHTML = '<b>全球聚合未开启或未配置读取凭据</b>：' + escapeHtml(rawData.message || '回退展示当前本地 PoP 数据') + '。可至 Cloudflare 控制台激活 Analytics Engine。';
             noticeEl.style.borderLeftColor = 'var(--accent-amber)';
             document.getElementById('analyticsStatus').innerText = '未激活全局读取 (展示本地)';
             document.getElementById('analyticsStatus').style.color = 'var(--accent-amber)';
@@ -1630,7 +1683,7 @@ doggo linux.do @${origin}${config.path} --doh</code></pre>
             if (rawData.fallback) data = rawData.fallback;
           }
         } else {
-          noticeEl.innerHTML = '📍 统计范围：当前 Cloudflare 边缘节点内存实时采样 (单实例)';
+          noticeEl.innerHTML = '统计范围：当前 Cloudflare 边缘节点内存实时采样 (单实例)';
           noticeEl.style.borderLeftColor = 'var(--primary)';
           document.getElementById('analyticsStatus').innerText = '已接入 (Worker 点位写入)';
           document.getElementById('analyticsStatus').style.color = 'var(--primary)';
