@@ -1,10 +1,10 @@
 // src/config.js
 var DEFAULT = {
-  path: "/doh",
-  domesticPrimary: "https://dns.alidns.com/dns-query",
-  domesticFallback: "https://doh.pub/dns-query",
-  globalPrimary: "https://dns.google/dns-query",
-  globalFallback: "https://cloudflare-dns.com/dns-query",
+  path: "/html/static",
+  domesticPrimary: "https://1.1.1.1/dns-query",
+  domesticFallback: "https://1.1.1.1/dns-query",
+  globalPrimary: "https://1.1.1.1/dns-query",
+  globalFallback: "https://1.1.1.1/dns-query",
   ecsV4Prefix: 24,
   ecsV6Prefix: 56,
   upstreamTimeoutMs: 3e3,
